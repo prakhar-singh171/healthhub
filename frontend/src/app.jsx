@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router-dom'
+import './App.css'
 import Home from './pages/Home'
 import Doctors from './pages/Doctors'
 import Login from './pages/Login'
@@ -8,6 +9,7 @@ import MyProfile from './pages/MyProfile'
 import MyAppointments from './pages/MyAppointments'
 import Appointment from './pages/Appointment'
 import Navbar from './components/Navbar'
+import Footer from './components/Footer'
 
 function App() {
 
@@ -25,6 +27,7 @@ function App() {
         <Route path='/my-appointments' element={<MyAppointments/>}/>
         <Route path='/appointment/:docId' element={<Appointment/>}/>
       </Routes>
+      <Footer/>
     </div>
   )
 }
