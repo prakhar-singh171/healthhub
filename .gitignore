@@ -1,0 +1,72 @@
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore log files
+*.log
+*.out
+*.tmp
+*.lock
+
+# Ignore build artifacts
+/dist/
+/build/
+/bin/
+/obj/
+*.o
+*.so
+*.dll
+*.exe
+*.class
+
+# Ignore dependency directories
+/node_modules/
+/vendor/
+/target/
+/.idea/
+/.vscode/
+/venv/
+/__pycache__/
+
+# Ignore compiled Python files
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore Java-related files
+*.jar
+*.war
+*.ear
+*.iml
+*.class
+
+# Ignore environment files
+.env
+*.env
+*.secret
+config.json
+
+# Ignore database files
+*.sqlite3
+*.db
+*.sql
+
+# Ignore compressed files
+*.zip
+*.tar
+*.gz
+*.7z
+*.rar
+
+# Ignore generated documentation
+/docs/
+/coverage/
+*.coverage
+*.lcov
+
+# Ignore JetBrains IDE settings
+/.idea/
+/*.iml
+
+# Ignore VS Code settings
+/.vscode/
