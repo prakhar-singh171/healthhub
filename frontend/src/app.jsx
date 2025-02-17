@@ -1,43 +1,32 @@
-import { useState } from 'preact/hooks'
-import preactLogo from './assets/preact.svg'
-import viteLogo from '/vite.svg'
-import './app.css'
+import { Route, Routes } from 'react-router-dom'
+import Home from './pages/Home'
+import Doctors from './pages/Doctors'
+import Login from './pages/Login'
+import Contact from './pages/Contact'
+import About from './pages/About'
+import MyProfile from './pages/MyProfile'
+import MyAppointments from './pages/MyAppointments'
+import Appointment from './pages/Appointment'
+import Navbar from './components/Navbar'
 
-export function App() {
-  const [count, setCount] = useState(0)
+function App() {
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} class="logo" alt="Vite logo" />
-        </a>
-        <a href="https://preactjs.com" target="_blank">
-          <img src={preactLogo} class="logo preact" alt="Preact logo" />
-        </a>
-      </div>
-      <h1>Vite + Preact</h1>
-      <div class="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/app.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p>
-        Check out{' '}
-        <a
-          href="https://preactjs.com/guide/v10/getting-started#create-a-vite-powered-preact-app"
-          target="_blank"
-        >
-          create-preact
-        </a>
-        , the official Preact + Vite starter
-      </p>
-      <p class="read-the-docs">
-        Click on the Vite and Preact logos to learn more
-      </p>
-    </>
+    <div className="mx-4 sm:mx-[10%]">
+      <Navbar/>
+      <Routes>
+        <Route path='/' element={<Home/>}/>
+        <Route path='/doctors' element={<Doctors/>}/>
+        <Route path='/doctors/:speciality' element={<Doctors/>}/>
+        <Route path='/login' element={<Login/>}/>
+        <Route path='/about' element={<About/>}/>
+        <Route path='/contact' element={<Contact/>}/>
+        <Route path='/my-profile' element={<MyProfile/>}/>
+        <Route path='/ny-appointments' element={<MyAppointments/>}/>
+        <Route path='/appointment/:docId' element={<Appointment/>}/>
+      </Routes>
+    </div>
   )
 }
+
+export default App
