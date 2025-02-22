@@ -1,23 +1,12 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-
-
-dotenv.config();
-
-
-const mongoURI = process.env.MONGO_URI;
+import mongoose from "mongoose";
 
 const connectDB = async () => {
-  try {
-    
-    const conn = await mongoose.connect(mongoURI);
-    console.log(`Mongoose Connected! `);
-  } catch (error) {
-    console.error(`Error: ${error.message}`);
-    process.exit(1); 
-  }
-};
 
+    mongoose.connection.on('connected', () => console.log("Database Connected"))
+    await mongoose.connect(`${process.env.MONGODB_URI}/prescripto`)
+
+}
 
 export default connectDB;
 
+// Do not use '@' symbol in your databse user's password else it will show an error.
