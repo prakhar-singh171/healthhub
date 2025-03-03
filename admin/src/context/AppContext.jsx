@@ -1,16 +1,16 @@
-import { createContext} from 'react'
+import {  createContext } from "react";
 
-export const AppContext = createContext();
+export const DoctorContext = createContext()
 
-const AppContextProvider = ({children})=>{
+const DoctorContextProvider = ({children})=>{
     const value = {
 
     }
     return(
-        <AppContext.Provider value={value}>
+        <DoctorContext.Provider value={value}>
             {children}
-        </AppContext.Provider>
+        </DoctorContext.Provider>
     )
 }
 
-export default AppContextProvider
+export default DoctorContextProvider
