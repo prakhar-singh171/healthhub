@@ -63,3 +63,15 @@ export const userLogin = async (req, res) => {
         return res.status(500).json({ success: false, message: error.message });
     }
 };
+
+
+export const getProfile = async(req,res)=>{
+    try {
+        const {userId} = req.body;
+        const userData = await userModel.findById(userId).select('-password')
+        res.json({success:true,userData})
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
