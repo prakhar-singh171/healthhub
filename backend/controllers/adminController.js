@@ -49,19 +49,11 @@ const addDoctor = async(req,res)=>{
 const loginAdmin = async (req,res)=>{
     try {
         const {email,password} = req.body;
-        console.log(email);
-         console.log(password)
-         console.log(process.env.JWT_SCERET);
-         console.log(process.env.ADMIN_PASSWORD);
         if(email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD){
-            console.log('fdsfd')
-            const token =  jwt.sign(email+password,process.env.JWT_SECRET,{
-                expiresIn:'1h'
-            })
-            console.log(token)
+            const token =  jwt.sign({email: email}, process.env.JWT_SECRET, { expiresIn: '1h' })
             res.json({success:true,token})
         }else{
-            res.json({success:false,message:"Invalid Credatinals"})
+            res.json({success:false,message:"Invalid Credentials"})
         }
     } catch (error) {
         console.log(error)
@@ -77,4 +69,5 @@ const alldoctors = async(req,res)=>{
         res.json({success:false,message:error.message});
     }
 }
+
 export {addDoctor,loginAdmin,alldoctors}
