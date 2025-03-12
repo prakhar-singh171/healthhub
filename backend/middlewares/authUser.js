@@ -1,19 +1,22 @@
-import jwt from 'jsonwebtoken'
-const authAdmin = async (req, res, next) => {
-    try {
-        const {atoken} = req.headers; 
-        if (!atoken) {
-            return res.json({ success: false, message: "Not Authorized, Login Again" });
-        }
-        const token_decoded = jwt.verify(atoken, process.env.JWT_SECRET); 
+import jwt from 'jsonwebtoken';
 
-        if (token_decoded !== process.env.ADMIN_EMAIL + process.env.ADMIN_PASSWORD) {
+const authUser = async (req, res, next) => {
+    try {
+        const authHeader = req.headers.authorization; 
+        if (!authHeader) {
             return res.json({ success: false, message: "Not Authorized, Login Again" });
         }
-        next();
+
+        const token = authHeader.split(' ')[1]; 
+        const decoded = jwt.verify(token, process.env.JWT_SECRET); 
+
+        req.body.userId = decoded.id;
+        req.user = decoded; 
+        next(); 
     } catch (error) {
         console.log(error.message);
         return res.json({ success: false, message: error.message });
     }
 };
-export default authAdmin
+
+export default authUser;
