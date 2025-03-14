@@ -2,6 +2,8 @@ import validator from "validator";
 import bcrypt from 'bcrypt'
 import {v2 as cloudinary} from 'cloudinary'
 import doctorModel from "../models/doctorModel.js";
+import appointmentModel from "../models/appointmentModel.js";
+import userModel from "../models/userModel.js";
 import jwt from 'jsonwebtoken'
 
 const addDoctor = async(req,res)=>{
@@ -61,6 +63,8 @@ const loginAdmin = async (req,res)=>{
     }
 }
 const alldoctors = async(req,res)=>{
+
+    console.log('ttt')
     try {
         const doctors = await doctorModel.find({}).select('-password')
         res.json({success:true,doctors})
@@ -70,4 +74,55 @@ const alldoctors = async(req,res)=>{
     }
 }
 
-export {addDoctor,loginAdmin,alldoctors}
+const adminDashboard = async (req, res) => {
+    try {
+
+        const doctors = await doctorModel.find({})
+        const users = await userModel.find({})
+        const appointments = await appointmentModel.find({})
+
+        const dashData = {
+            doctors: doctors.length,
+            appointments: appointments.length,
+            patients: users.length,
+            latestAppointments: appointments.reverse()
+        }
+
+        res.json({ success: true, dashData })
+
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
+const appointmentsAdmin = async (req, res) => {
+    try {
+
+        const appointments = await appointmentModel.find({})
+        res.json({ success: true, appointments })
+
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+
+}
+
+// API for appointment cancellation
+const appointmentCancel = async (req, res) => {
+    try {
+
+        const { appointmentId } = req.body
+        await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true })
+
+        res.json({ success: true, message: 'Appointment Cancelled' })
+
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+
+}
+
+export {addDoctor,loginAdmin,alldoctors,appointmentCancel,appointmentsAdmin,adminDashboard}

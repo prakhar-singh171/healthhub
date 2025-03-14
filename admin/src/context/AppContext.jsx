@@ -1,48 +1,42 @@
-import { createContext, useEffect, useState } from "react";
-import { toast } from "react-toastify";
-import axios from 'axios'
+import { createContext } from "react";
 
-export const AppContext = createContext();
 
-const AppContextProvider = ({children}) => {
-    const [doctors, setDoctors] = useState([]);
-    const currencySymbol = '$'
-    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+export const AppContext = createContext()
 
-    const getDoctorsData = async () => {
-        try {
-            const response = await axios.get(backendUrl + '/api/doctor/list');
-            
-            if (response.data && response.data.success) {
-                if (Array.isArray(response.data.doctors)) {
-                    setDoctors(response.data.doctors);
-                    toast.success(response.message);
-                }
-            } else {
-                console.error("API request failed:", response.data);
-                toast.error(response.data?.message || "Failed to fetch doctors");
-            }
-        } catch (error) {
-            console.error("Error fetching doctors:", error);
-            toast.error(error.message || "An error occurred while fetching doctors");
-        }
+const AppContextProvider = (props) => {
+
+    const currency = import.meta.env.VITE_CURRENCY
+    const backendUrl = import.meta.env.VITE_BACKEND_URL
+
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+    // Function to format the date eg. ( 20_01_2000 => 20 Jan 2000 )
+    const slotDateFormat = (slotDate) => {
+        const dateArray = slotDate.split('_')
+        return dateArray[0] + " " + months[Number(dateArray[1])] + " " + dateArray[2]
     }
 
-    useEffect(() => {
-        getDoctorsData()
-    }, [])
+    // Function to calculate the age eg. ( 20_01_2000 => 24 )
+    const calculateAge = (dob) => {
+        const today = new Date()
+        const birthDate = new Date(dob)
+        let age = today.getFullYear() - birthDate.getFullYear()
+        return age
+    }
 
     const value = {
-        doctors,
-        currencySymbol,
-        getDoctorsData
+        backendUrl,
+        currency,
+        slotDateFormat,
+        calculateAge,
     }
 
     return (
         <AppContext.Provider value={value}>
-            {children}
+            {props.children}
         </AppContext.Provider>
     )
+
 }
 
-export default AppContextProvider;
+export default AppContextProvider
