@@ -23,3 +23,24 @@ export const doctorList = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 }
+
+export const loginDoctor = async (req,res)=>{
+    try {
+        const {email,password} = req.body;
+        const doctor = await doctorModel.findOne({email})
+        if(!doctor){
+            res.json({success:false,message:"Invalid crdentials"})
+        }
+        const isMatch = await bcrypt.compare(password,doctor.password)
+        if(isMatch){
+            const token = jwt.sign({id:doctor._id},process.env.JWT_SECRET)
+            res.json({success:true,token})
+        }else{
+            res.json({success:false,message:"Invalid crdentials"})
+
+        }
+    } catch (error) {
+        console.error("Error fetching doctors:", error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
