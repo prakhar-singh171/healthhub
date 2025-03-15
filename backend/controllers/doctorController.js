@@ -44,3 +44,14 @@ export const loginDoctor = async (req,res)=>{
         res.status(500).json({ success: false, message: error.message });
     }
 }
+
+export const appointmentDoctor = async (req,res)=>{
+    try {
+       const {docId} = req.body;
+       const appointments = await appointmentModel.find({docId})
+       res.json({success:true,appointments}) 
+    } catch (error) {
+        console.error("Error fetching doctors:", error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
