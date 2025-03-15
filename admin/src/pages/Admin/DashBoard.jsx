@@ -44,7 +44,7 @@ const DashBoard = () => {
         </div>
         <div className='pt-4 border border-t-0 '>
             {
-              dashData.latestAppointment.map((item,index)=>(
+              dashData.latestAppointments.map((item,index)=>(
                 <div className='flex items-center px-6 py-3 gap-3 hover:bg-gray-100' key={index}>
                   <img className='rounded-full w-10' src={item.docData.image} alt="" />
                   <div className='flex-1 text-sm'>
@@ -52,7 +52,7 @@ const DashBoard = () => {
                     <p className='text-gray-600'>{slotsDateFormat(item.slotDate)}</p>
                   </div>
                   {
-              item.cancelled ? <p className='text-red-500 text-xs font-medium'>cancelled</p> : <img src={assets.cancel_icon} alt="image" onClick={()=>Appointmentcancel(item._id)} className=' rounded-full w-10 cursor-pointer'/>
+              item.cancelled ? <p className='text-red-500 text-xs font-medium'>cancelled</p> :item.isCompleted ? <p className='text-green-500 text-xs font-medium' >completed</p>:<img  alt="icon" onClick={()=>Appointmentcancel(item._id)} className='w-10 cursor-pointer' src={assets.cancel_icon}/>
             }
                 </div>
               ))

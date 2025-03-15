@@ -5,7 +5,7 @@ import appointmentModel from "../models/appointmentModel.js";
 
 import jwt from "jsonwebtoken";
 
-export const changeAvailblity = async (req,res)=>{
+export const changeAvailability = async (req,res)=>{
     try {
         const {docId} = req.body;
 

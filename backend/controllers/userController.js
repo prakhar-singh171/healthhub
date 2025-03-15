@@ -175,11 +175,15 @@ export const registeruser = async (req, res) => {
       console.log(req.body);
       const { userId, docId, slotDate, slotTime } = req.body;
       const docData = await doctorModel.findById(docId).select("-password");
-      if (!docData.available) {
+      console.log(docData.available);
+      if (!Boolean(docData.available)) {
+        console.log('11');
         return res
-          .status(400)
-          .json({ success: false, message: "Doctor not Found" });
+          .status(200)
+          .json({ success: false, message: "Doctor not available" });
       }
+      console.log('sdfsdf');
+
       let slots_booked = docData.slots_booked;
       if (slots_booked[slotDate]) {
         if (slots_booked[slotDate].includes(slotTime)) {
