@@ -1,6 +1,9 @@
 import doctorModel from "../models/doctorModel.js";
+import bcrypt from "bcrypt";
+import appointmentModel from "../models/appointmentModel.js";
 
 
+import jwt from "jsonwebtoken";
 
 export const changeAvailblity = async (req,res)=>{
     try {
@@ -45,6 +48,7 @@ export const loginDoctor = async (req,res)=>{
     }
 }
 
+
 export const appointmentDoctor = async (req,res)=>{
     try {
        const {docId} = req.body;
@@ -52,6 +56,38 @@ export const appointmentDoctor = async (req,res)=>{
        res.json({success:true,appointments}) 
     } catch (error) {
         console.error("Error fetching doctors:", error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+export const appointmentComplete = async(req,res)=>{
+    try {
+        const {docId,appointmentId} = req.body;
+        const appointmentData = await appointmentModel.findById(appointmentId)
+        if(appointmentData && appointmentData.docId === docId){
+            await appointmentModel.findByIdAndUpdate(appointmentId,{isCompleted:true})
+            return res.json({success:true,message:"Appointment completed"})
+        }else{
+            return res.json({success:false,message:"Mark failed"})
+        }
+    } catch (error) {
+        console.error( error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+export const appointmentCancel = async(req,res)=>{
+    try {
+        const {docId,appointmentId} = req.body;
+        const appointmentData = await appointmentModel.findById(appointmentId)
+        if(appointmentData && appointmentData.docId === docId){
+            await appointmentModel.findByIdAndUpdate(appointmentId,{cancelled:true})
+            return res.json({success:true,message:"Appointment cancelled"})
+        }else{
+            return res.json({success:false,message:"Cancellation failed"})
+        }
+    } catch (error) {
+        console.error( error);
         res.status(500).json({ success: false, message: error.message });
     }
 }
