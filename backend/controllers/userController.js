@@ -359,20 +359,8 @@ export const sendEmail = async (req, res) => {
         htmlContent: `<p>Please click the link below to verify your email address:</p>
                       <a href="${verificationUrl}">${verificationUrl}</a>`,
       };
-    } else {
-      // Generate OTP for forgot password
-      const otp = Math.floor(100000 + Math.random() * 900000);
-
-      // Save OTP to database
-      await new Token({ token: otp, email: userEmail, sub: subject }).save();
-
-      emailContent = {
-        sender: { name: "Your App", email: process.env.BREVO_SENDER_EMAIL },
-        to: [{ email: userEmail }],
-        subject: 'OTP for Forgot Password',
-        htmlContent: `<p>Your OTP for password reset is: <strong>${otp}</strong></p>`,
-      };
-    }
+    } 
+   
 
     // Send email using Brevo
     const response = await axios.post(BREVO_API_URL, emailContent, {
@@ -393,7 +381,7 @@ export const sendEmail = async (req, res) => {
   }
 };
 
-// Function to verify email or OTP
+// Function to verify email 
 export const verifyEmail = async (req, res) => {
   try {
     const { email, token } = req.body;
@@ -426,5 +414,110 @@ export const verifyEmail = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+const sendForgotPasswordEmailWithBrevo = async (email, resetUrl) => {
+  try {
+    // Email content
+    const emailContent = {
+      sender: { name: "Your App", email: process.env.BREVO_SENDER_EMAIL },
+      to: [{ email }],
+      subject: "Password Reset Request",
+      htmlContent: `
+        <h1>Password Reset Request</h1>
+        <p>You have requested to reset your password.</p>
+        <p>Click the link below to reset your password:</p>
+        <a href="${resetUrl}" target="_blank">${resetUrl}</a>
+        <p>If you did not request this, you can safely ignore this email.</p>
+      `,
+    };
+
+    // Send email using Brevo's API
+    const response = await axios.post(BREVO_API_URL, emailContent, {
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": process.env.BREVO_API_KEY,
+      },
+    });
+
+    // Check response status
+    if (response.status === 201) {
+      console.log(`Forgot password email sent to ${email}`);
+      return true;
+    } else {
+      console.error(`Failed to send email: ${response.statusText}`);
+      return false;
+    }
+  } catch (error) {
+    console.error("Error sending forgot password email with Brevo:", error.message);
+    return false;
+  }
+};
+
+// Forgot password controller function
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Check if the user exists
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Generate a reset token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = await bcrypt.hash(resetToken, 10);
+
+    // Save the token and its expiration in the user's record
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpire = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    // Construct reset password URL
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&email=${email}`;
+
+    // Send the reset password email
+    const emailSent = await sendForgotPasswordEmailWithBrevo(email, resetUrl);
+    if (emailSent) {
+      return res.status(200).json({
+        success:'true',
+        message: "Password reset email sent successfully. Please check your email.",
+      });
+    } else {
+      return res.status(500).json({ error: "Failed to send reset email. Try again later." });
+    }
+  } catch (error) {
+    console.error("Error in forgotPassword controller:", error.message);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, token, newPassword } = req.body;
+
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Verify the token
+    const isValidToken = await bcrypt.compare(token, user.resetPasswordToken);
+    if (!isValidToken || user.resetPasswordExpire < Date.now()) {
+      return res.status(400).json({ error: "Invalid or expired token" });
+    }
+
+    // Update the password
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.resetPasswordToken = undefined; // Clear token
+    user.resetPasswordExpire = undefined; // Clear expiration
+    await user.save();
+
+    res.status(200).json({ message: "Password has been reset successfully" });
+  } catch (error) {
+    console.error("Error in resetPassword:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };

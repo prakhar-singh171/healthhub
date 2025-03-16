@@ -13,6 +13,8 @@ import VerifyEmail from "./pages/VerifyEmail";
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ResetPassword from './pages/ResetPassword'
+import ForgotPassword from './pages/ForgotPassword'
 function App() {
 
   return (
@@ -30,6 +32,8 @@ function App() {
         <Route path='/my-appointments' element={<MyAppointments/>}/>
         <Route path='/appointment/:docId' element={<Appointment/>}/>
         <Route path="/verify-email/:token/:email" element={<VerifyEmail />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
       </Routes>
       <Footer/>

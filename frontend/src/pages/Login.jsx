@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [state, setState] = useState("login");
@@ -10,7 +10,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const { backendUrl, token, setToken } = useContext(AppContext);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
@@ -24,7 +24,7 @@ const Login = () => {
         });
         if (response.data.success) {
           toast.success("Sign up successful! You can log in now.");
-          setState("login"); 
+          setState("login");
         } else {
           toast.error(response.data.message || "Sign up failed.");
         }
@@ -37,7 +37,7 @@ const Login = () => {
           localStorage.setItem("token", response.data.token);
           setToken(response.data.token);
           toast.success("Login successful!");
-          navigate("/"); 
+          navigate("/");
         } else {
           toast.error(response.data.message || "Login failed.");
         }
@@ -103,27 +103,37 @@ const Login = () => {
         >
           {state === "Sign Up" ? "Create Account" : "Login"}
         </button>
-        
         {state === "Sign Up" ? (
           <p>
             Already have an account?{" "}
             <span
-              onClick={() => setState("login")} // Update to 'login'
+              onClick={() => setState("login")}
               className="text-primary underline cursor-pointer ml-1"
             >
               Login here
             </span>{" "}
           </p>
         ) : (
-          <p>
-            Create a new account?{" "}
-            <span
-              className="text-primary underline cursor-pointer ml-1"
-              onClick={() => setState("Sign Up")}
-            >
-              Click here
-            </span>
-          </p>
+          <>
+            <p>
+              Create a new account?{" "}
+              <span
+                className="text-primary underline cursor-pointer ml-1"
+                onClick={() => setState("Sign Up")}
+              >
+                Click here
+              </span>
+            </p>
+            <p>
+              Forgot your password?{" "}
+              <span
+                className="text-primary underline cursor-pointer ml-1"
+                onClick={() => navigate("/forgot-password")}
+              >
+                Reset it here
+              </span>
+            </p>
+          </>
         )}
       </div>
     </form>
