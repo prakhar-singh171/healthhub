@@ -12,32 +12,34 @@ const MyProfile = () => {
     backendUrl,
     token,
   } = useContext(AppContext);
-
   const [isEdit, setIsEdit] = useState(false);
   const [image, setImage] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
   const updateUserProfileData = async () => {
     try {
-      const formData = new FormData();
-      formData.append("name", userData.name);
-      formData.append("phone", userData.phone);
-      formData.append("address", JSON.stringify(userData.address));
-      formData.append("gender", userData.gender);
-      formData.append("dob", userData.dob);
+      const formdata = new FormData();
+      formdata.append("name", userData.name);
+      formdata.append("phone", userData.phone);
+      formdata.append("address", JSON.stringify(userData.address));
+      formdata.append("gender", userData.gender);
+      formdata.append("dob", userData.dob);
 
-      image && formData.append("image", image);
-
+      image && formdata.append("image", image);
       const { data } = await axios.post(
         backendUrl + "/api/user/update-profile",
-        formData,
+        formdata,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-
       if (data.success) {
         toast.success(data.message);
         await loadUserProfileData();
@@ -52,48 +54,50 @@ const MyProfile = () => {
     }
   };
 
-  const handleResendVerificationEmail = async () => {
+  const handleChangePassword = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
     try {
-      setIsVerifying(true);
       const { data } = await axios.post(
-        `${backendUrl}/api/user/send-email`,
-        { email: userData.email, subject: "EmailVerification" },
+        backendUrl + "/api/user/change-password",
+        {
+          email: userData.email,
+          newPassword: passwordData.newPassword,
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-
       if (data.message) {
-        toast.success("Verification email sent successfully!");
-      } else {
-        toast.error(data.error || "Failed to send verification email.");
+        toast.success(data.message);
+        setShowPasswordModal(false);
+        setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
       }
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.message || "Network error");
-    } finally {
-      setIsVerifying(false);
+      toast.error(error.response?.data?.message || "Failed to update password");
     }
   };
 
   return (
     userData && (
       <div className="max-w-lg flex flex-col gap-2 text-sm text-left">
-        {/* Profile Picture */}
         {isEdit ? (
           <label htmlFor="image">
             <div className="inline-block relative cursor-pointer">
               <img
                 className="w-36 opacity-75 rounded"
                 src={image ? URL.createObjectURL(image) : userData.image}
-                alt="Profile"
+                alt=""
               />
               <img
                 className="w-10 absolute bottom-12 right-12"
                 src={image ? "" : assets.upload_icon}
-                alt="Upload Icon"
+                alt=""
               />
             </div>
             <input
@@ -104,10 +108,8 @@ const MyProfile = () => {
             />
           </label>
         ) : (
-          <img className="w-36 rounded" src={userData.image || ""} alt="Profile" />
+          <img className="w-36 rounded" src={userData.image || ""} alt="" />
         )}
-
-        {/* User Information */}
         {isEdit ? (
           <input
             className="bg-gray-50 text-3xl font-medium max-w-60 mt-4 border border-gray-700 px-2 py-1 mb-2 text-start rounded-md"
@@ -122,28 +124,12 @@ const MyProfile = () => {
             {userData.name}
           </p>
         )}
-
         <hr className="bg-zinc-400 h-[1px] border-none" />
         <div>
           <p className="text-neutral-500 underline mt-3">CONTACT INFORMATION</p>
           <div className="grid grid-cols-[1fr_3fr] gap-y-2.5 mt-3 text-neutral-700">
-            <p className="font-medium">Email ID:</p>
+            <p className="font-medium">Email id:</p>
             <p className="text-blue-500">{userData.email}</p>
-            <p className="font-medium">Verification:</p>
-            {userData.isVerified ? (
-              <p className="text-green-500 font-medium">Verified</p>
-            ) : (
-              <div className="flex items-center gap-2">
-                <p className="text-red-500 font-medium">Not Verified</p>
-                <button
-                  className="text-blue-500 underline"
-                  disabled={isVerifying}
-                  onClick={handleResendVerificationEmail}
-                >
-                  {isVerifying ? "Sending..." : "Resend Verification Email"}
-                </button>
-              </div>
-            )}
             <p className="font-medium">Phone:</p>
             {isEdit ? (
               <input
@@ -157,9 +143,42 @@ const MyProfile = () => {
             ) : (
               <p className="text-blue-400">{userData.phone}</p>
             )}
+            <p className="font-medium">Address:</p>
+            {isEdit ? (
+              <p>
+                <input
+                  className="bg-gray-50 border rounded-md border-gray-700 px-2 py-1 mb-2"
+                  type="text"
+                  value={userData.address?.line1 || ""}
+                  onChange={(e) =>
+                    setUserData((prev) => ({
+                      ...prev,
+                      address: { ...prev.address, line1: e.target.value },
+                    }))
+                  }
+                />
+                <br />
+                <input
+                  className="bg-gray-50 border rounded-md border-gray-700 px-2 py-1 mb-2"
+                  type="text"
+                  value={userData.address?.line2 || ""}
+                  onChange={(e) =>
+                    setUserData((prev) => ({
+                      ...prev,
+                      address: { ...prev.address, line2: e.target.value },
+                    }))
+                  }
+                />
+              </p>
+            ) : (
+              <p>
+                {userData.address?.line1}
+                <br />
+                {userData.address?.line2}
+              </p>
+            )}
           </div>
         </div>
-
         <div>
           <p className="text-neutral-500 underline mt-3">BASIC INFORMATION</p>
           <div className="grid grid-cols-[1fr_3fr] gap-y-2.5 mt-3 text-neutral-700">
@@ -179,11 +198,12 @@ const MyProfile = () => {
             ) : (
               <p className="text-gray-400">{userData.gender}</p>
             )}
-            <p className="font-medium">BirthDay:</p>
+            <p className="font-medium">BirthDay</p>
             {isEdit ? (
               <input
                 className="max-w-28 rounded-md bg-gray-100 border border-gray-700 px-2 py-1 mb-2"
                 type="date"
+                value={userData.dob}
                 onChange={(e) =>
                   setUserData((prev) => ({ ...prev, dob: e.target.value }))
                 }
@@ -193,7 +213,6 @@ const MyProfile = () => {
             )}
           </div>
         </div>
-
         <div>
           {isEdit ? (
             <button
@@ -210,10 +229,59 @@ const MyProfile = () => {
               Edit
             </button>
           )}
+          <button
+            className="border border-red-500 px-8 py-2 mt-4 rounded-full hover:bg-red-500 hover:text-white transition-all"
+            onClick={() => setShowPasswordModal(true)}
+          >
+            Change Password
+          </button>
         </div>
+
+        {showPasswordModal && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+              <h2 className="text-xl font-bold mb-4">Change Password</h2>
+             
+              <input
+                type="password"
+                placeholder="New Password"
+                className="w-full border rounded-md px-3 py-2 mb-2"
+                value={passwordData.newPassword}
+                onChange={(e) =>
+                  setPasswordData({ ...passwordData, newPassword: e.target.value })
+                }
+              />
+              <input
+                type="password"
+                placeholder="Confirm New Password"
+                className="w-full border rounded-md px-3 py-2 mb-4"
+                value={passwordData.confirmPassword}
+                onChange={(e) =>
+                  setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                }
+              />
+              <div className="flex justify-between">
+                <button
+                  className="border border-primary px-6 py-2 rounded-full hover:bg-primary hover:text-white"
+                  onClick={handleChangePassword}
+                >
+                  Change Password
+                </button>
+                <button
+                  className="border border-gray-400 px-6 py-2 rounded-full hover:bg-gray-200"
+                  onClick={() => setShowPasswordModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   );
 };
 
 export default MyProfile;
+
+               

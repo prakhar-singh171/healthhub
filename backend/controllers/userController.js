@@ -314,7 +314,7 @@ export const verifyRazorpay = async (req, res) => {
 export const changePassword = async (req, res) => {
     try {
         const { email } = req.body;
-        const user = await User.findOne({ email });
+        const user = await userModel.findOne({ email });
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
