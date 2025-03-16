@@ -349,6 +349,7 @@ export const sendEmail = async (req, res) => {
       // Save token to database
       await new Token({ token, email: userEmail, sub: subject }).save();
 
+
       // Verification link
       const verificationUrl = `${process.env.FRONTEND_URL}/verify-email/${token}/${userEmail}`;
       emailContent = {
@@ -397,42 +398,33 @@ export const verifyEmail = async (req, res) => {
   try {
     const { email, token } = req.body;
 
-    // Find token record in database
     const record = await Token.findOne({ email });
     if (!record) {
-      return res.status(401).json({ message: "Invalid email or token" });
+      return res.status(401).json({ message: "No verification record found." });
+    }
+
+    if (record.token !== token) {
+      return res.status(401).json({ message: "Invalid or incorrect token." });
+    }
+
+    const tokenAge = new Date() - record.createdAt;
+    if (tokenAge > 45 * 60 * 1000) { // Token expired after 45 minutes
+      await Token.deleteOne({ _id: record._id });
+      return res.status(400).json({ message: "Verification link expired. Request a new link." });
     }
 
     const user = await userModel.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found." });
     }
 
-    if (record.sub === "EmailVerification") {
-      // Verify email token
-      if (record.token !== token) {
-        await Token.deleteOne({ _id: record._id });
-        return res.status(401).json({ message: "Invalid verification token" });
-      }
+    user.isVerified = true;
+    await user.save();
+    await Token.deleteOne({ _id: record._id });
 
-      // Mark user as verified
-      user.isVerified = true;
-      await user.save();
-      await Token.deleteOne({ _id: record._id });
-
-      return res.status(200).json({ success:'true', message: "User verified successfully" });
-    } else {
-      // Verify OTP for password reset
-      if (record.token !== token) {
-        await Token.deleteOne({ _id: record._id });
-        return res.status(401).json({ message: "Invalid OTP" });
-      }
-
-      await Token.deleteOne({ _id: record._id });
-      return res.status(200).json({ message: "OTP verified successfully" });
-    }
+    return res.status(200).json({ success: true, message: "Email verified successfully." });
   } catch (error) {
-    console.error('Verification error:', error);
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ message: "Internal server error." });
   }
 };
