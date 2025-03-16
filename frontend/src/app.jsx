@@ -9,6 +9,8 @@ import MyAppointments from './pages/MyAppointments'
 import Appointment from './pages/Appointment'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
+import VerifyEmail from "./pages/VerifyEmail"; 
+
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 function App() {
@@ -27,6 +29,8 @@ function App() {
         <Route path='/my-profile' element={<MyProfile/>}/>
         <Route path='/my-appointments' element={<MyAppointments/>}/>
         <Route path='/appointment/:docId' element={<Appointment/>}/>
+        <Route path="/verify-email/:token/:email" element={<VerifyEmail />} />
+
       </Routes>
       <Footer/>
     </div>

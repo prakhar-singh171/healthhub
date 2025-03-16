@@ -39,11 +39,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "Not Selected",
     },
+    isVerified: { type: Boolean, default: false },
     phone: {
       type: String,
       default: "00000000000",
     },
   },
+
   { timestamps: true }
 );
 

@@ -1,6 +1,12 @@
 import validator from 'validator'
 import bcrypt from 'bcrypt'
 import userModel from '../models/userModel.js';
+import Token from '../models/tokenModel.js';
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
+import axios from 'axios';
+
+
 import jwt from 'jsonwebtoken'
 import {v2 as cloudinary} from 'cloudinary'
 import doctorModel from "../models/doctorModel.js";
@@ -303,3 +309,130 @@ export const verifyRazorpay = async (req, res) => {
         res.json({ success: false, message: error.message })
     }
 }
+
+
+export const changePassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        user.password = await bcrypt.hash(req.body.newPassword, 10);
+        await user.save();
+
+        res.status(200).json({ message: "new password set successfully" });
+    } catch (error) {
+        console.log("error: ", error);
+        res.status(500).json({ error: error.message })
+    }
+}
+
+const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+
+// Function to send email
+export const sendEmail = async (req, res) => {
+  try {
+    const { email: userEmail, subject } = req.body;
+
+    // Remove existing token if it exists
+    const existingRecord = await Token.findOne({ email: userEmail });
+    if (existingRecord) await Token.deleteOne({ _id: existingRecord._id });
+
+    let token, emailContent;
+
+    if (subject === "EmailVerification") {
+      // Generate token
+      token = crypto.randomBytes(26).toString('hex').slice(0, 35);
+
+      // Save token to database
+      await new Token({ token, email: userEmail, sub: subject }).save();
+
+      // Verification link
+      const verificationUrl = `${process.env.FRONTEND_URL}/verify-email/${token}/${userEmail}`;
+      emailContent = {
+        sender: { name: "Your App", email: process.env.BREVO_SENDER_EMAIL },
+        to: [{ email: userEmail }],
+        subject: 'Verify Your Email Address',
+        htmlContent: `<p>Please click the link below to verify your email address:</p>
+                      <a href="${verificationUrl}">${verificationUrl}</a>`,
+      };
+    } else {
+      // Generate OTP for forgot password
+      const otp = Math.floor(100000 + Math.random() * 900000);
+
+      // Save OTP to database
+      await new Token({ token: otp, email: userEmail, sub: subject }).save();
+
+      emailContent = {
+        sender: { name: "Your App", email: process.env.BREVO_SENDER_EMAIL },
+        to: [{ email: userEmail }],
+        subject: 'OTP for Forgot Password',
+        htmlContent: `<p>Your OTP for password reset is: <strong>${otp}</strong></p>`,
+      };
+    }
+
+    // Send email using Brevo
+    const response = await axios.post(BREVO_API_URL, emailContent, {
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': BREVO_API_KEY,
+      },
+    });
+
+    if (response.status === 201) {
+      res.status(200).json({ message: "Email sent successfully" });
+    } else {
+      throw new Error('Failed to send email');
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Function to verify email or OTP
+export const verifyEmail = async (req, res) => {
+  try {
+    const { email, token } = req.body;
+
+    // Find token record in database
+    const record = await Token.findOne({ email });
+    if (!record) {
+      return res.status(401).json({ message: "Invalid email or token" });
+    }
+
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (record.sub === "EmailVerification") {
+      // Verify email token
+      if (record.token !== token) {
+        await Token.deleteOne({ _id: record._id });
+        return res.status(401).json({ message: "Invalid verification token" });
+      }
+
+      // Mark user as verified
+      user.isVerified = true;
+      await user.save();
+      await Token.deleteOne({ _id: record._id });
+
+      return res.status(200).json({ success:'true', message: "User verified successfully" });
+    } else {
+      // Verify OTP for password reset
+      if (record.token !== token) {
+        await Token.deleteOne({ _id: record._id });
+        return res.status(401).json({ message: "Invalid OTP" });
+      }
+
+      await Token.deleteOne({ _id: record._id });
+      return res.status(200).json({ message: "OTP verified successfully" });
+    }
+  } catch (error) {
+    console.error('Verification error:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
