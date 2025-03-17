@@ -9,6 +9,8 @@ import userRouter from './routes/userRoute.js';
 import cookieParser from 'cookie-parser';
 
 import dotenv from 'dotenv'
+import errorController from './controllers/errorController.js';
+import AppError from './utils/appError.js';
 const app = express();
 
 const port = process.env.PORT || 4000;
@@ -31,6 +33,14 @@ app.use(cors(corsOptions))
 app.use('/api/admin',adminRouter)
 app.use('/api/doctor',doctorRouter)
 app.use('/api/user',userRouter)
+
+app.all('*', (req, res, next) => {
+
+    next(new AppError(`Can't find ${req.originalUrl} on this server`), 404);
+  });
+  
+  //ERROR HEADLING MIDDLEWARE
+  app.use(errorController);
 
 app.get('/',(req,res)=>{
     res.send('API IS WORKING')

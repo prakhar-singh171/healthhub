@@ -4,31 +4,20 @@ import appointmentModel from "../models/appointmentModel.js";
 
 
 import jwt from "jsonwebtoken";
+import catchAsync from "../utils/catchAsync.js";
 
-export const changeAvailability = async (req,res)=>{
-    try {
+export const changeAvailability = catchAsync(async (req,res)=>{
         const {docId} = req.body;
 
         const docData = await doctorModel.findById(docId)
         await doctorModel.findByIdAndUpdate(docId,{available:!docData.available})
         res.json({success:true,message:"Availblity checked"})
-    } catch (error) {
-        console.log(error)
-        res.json({success:false,message:error.message});
-    }
-}
-export const doctorList = async (req, res) => {
-    try {
+    } )
+export const doctorList = catchAsync(async (req, res) => {
         const doctors = await doctorModel.find({}).select(['-password', '-email'])
         res.json({ success: true, doctors, message: "Doctors fetched successfully" })
-    } catch (error) {   
-        console.error("Error fetching doctors:", error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-}
-
-export const loginDoctor = async (req,res)=>{
-    try {
+    } )
+export const loginDoctor = catchAsync(async (req,res)=>{
         const {email,password} = req.body;
         const doctor = await doctorModel.findOne({email})
         if(!doctor){
@@ -42,26 +31,15 @@ export const loginDoctor = async (req,res)=>{
             res.json({success:false,message:"Invalid crdentials"})
 
         }
-    } catch (error) {
-        console.error("Error fetching doctors:", error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-}
+    } )
 
-
-export const appointmentDoctor = async (req,res)=>{
-    try {
+export const appointmentDoctor = catchAsync(async (req,res)=>{
        const {docId} = req.body;
        const appointments = await appointmentModel.find({docId})
        res.json({success:true,appointments}) 
-    } catch (error) {
-        console.error("Error fetching doctors:", error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-}
+    } )
 
-export const appointmentComplete = async(req,res)=>{
-    try {
+export const appointmentComplete = catchAsync(async(req,res)=>{
         const {docId,appointmentId} = req.body;
         const appointmentData = await appointmentModel.findById(appointmentId)
         if(appointmentData && appointmentData.docId === docId){
@@ -70,14 +48,8 @@ export const appointmentComplete = async(req,res)=>{
         }else{
             return res.json({success:false,message:"Mark failed"})
         }
-    } catch (error) {
-        console.error( error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-}
-
-export const appointmentCancel = async(req,res)=>{
-    try {
+    } )
+export const appointmentCancel = catchAsync(async(req,res)=>{
         const {docId,appointmentId} = req.body;
         const appointmentData = await appointmentModel.findById(appointmentId)
         if(appointmentData && appointmentData.docId === docId){
@@ -86,15 +58,9 @@ export const appointmentCancel = async(req,res)=>{
         }else{
             return res.json({success:false,message:"Cancellation failed"})
         }
-    } catch (error) {
-        console.error( error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-}
+    } )
 
-
-export const dashboardDoctor = async(req,res)=>{
-    try {
+export const dashboardDoctor = catchAsync(async(req,res)=>{
         const {docId} = req.body;
         let earings = 0;
         const appointments = await appointmentModel.find({docId})
@@ -117,30 +83,15 @@ export const dashboardDoctor = async(req,res)=>{
             latestappointment:appointments.reverse().slice(0,5)
         }
         res.json({success:true,dashdata})
-    } catch (error) {
-        console.error( error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-}
+    } )
 
-export const getdoctorprofile = async (req, res) => {
-    try {
+export const getdoctorprofile = catchAsync(async (req, res) => {
       const { docId } = req.body
       const profiledata = await doctorModel.findById(docId).select('-password')
       res.json({ success: true, profileData: profiledata })
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ success: false, message: error.message });
-    }
-  }
-
-export const updateProfileData = async (req,res)=>{
-    try {
+    } )
+export const updateProfileData = catchAsync(async (req,res)=>{
         const {docId,fees,available,address}= req.body;
         await doctorModel.findByIdAndUpdate(docId,{fees,available,address})
         res.json({success:true,message:"Profile Updated"})
-    } catch (error) {
-        console.error( error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-}
+    } )

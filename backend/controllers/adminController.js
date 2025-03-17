@@ -5,9 +5,9 @@ import doctorModel from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 import userModel from "../models/userModel.js";
 import jwt from 'jsonwebtoken'
+import catchAsync from "../utils/catchAsync.js";
 
-const addDoctor = async(req,res)=>{
-    try {
+const addDoctor = catchAsync(async(req,res)=>{
         const {name,email,password,speciality,education,experience,about,fees,address} = req.body;
         const imagefile = req.file;
         if(!name || !email || !password || !speciality || !education || !experience || !about || !fees || !address){
@@ -42,14 +42,9 @@ const addDoctor = async(req,res)=>{
          const newDoctor = new doctorModel(doctorData)
          await newDoctor.save();
          res.json({success:true,message:"Doctor Added"})
-    } catch (error) {
-        console.log(error);
-        res.json({success:false,message:error.message})    
-    }
-}
+    } )
 
-const loginAdmin = async (req,res)=>{
-    try {
+const loginAdmin = catchAsync(async (req,res)=>{
         const {email,password} = req.body;
         if(email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD){
             const token =  jwt.sign({email: email}, process.env.JWT_SECRET, { expiresIn: '1h' })
@@ -57,25 +52,14 @@ const loginAdmin = async (req,res)=>{
         }else{
             res.json({success:false,message:"Invalid Credentials"})
         }
-    } catch (error) {
-        console.log(error)
-        res.json({success:false,message:error.message});
-    }
-}
-const alldoctors = async(req,res)=>{
+    } )
+const alldoctors = catchAsync(async(req,res)=>{
 
-    console.log('ttt')
-    try {
+    
         const doctors = await doctorModel.find({}).select('-password')
         res.json({success:true,doctors})
-    } catch (error) {
-        console.log(error)
-        res.json({success:false,message:error.message});
-    }
-}
-
-const adminDashboard = async (req, res) => {
-    try {
+    } )
+const adminDashboard = catchAsync(async (req, res) => {
 
         const doctors = await doctorModel.find({})
         const users = await userModel.find({})
@@ -90,39 +74,22 @@ const adminDashboard = async (req, res) => {
 
         res.json({ success: true, dashData })
 
-    } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
-    }
-}
+    } )
 
-const appointmentsAdmin = async (req, res) => {
-    try {
+const appointmentsAdmin = catchAsync(async (req, res) => {
 
         const appointments = await appointmentModel.find({})
         res.json({ success: true, appointments })
 
-    } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
-    }
-
-}
+    } )
 
 // API for appointment cancellation
-const appointmentCancel = async (req, res) => {
-    try {
+const appointmentCancel = catchAsync(async (req, res) => {
 
         const { appointmentId } = req.body
         await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true })
 
         res.json({ success: true, message: 'Appointment Cancelled' })
 
-    } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
-    }
-
-}
-
+    } )
 export {addDoctor,loginAdmin,alldoctors,appointmentCancel,appointmentsAdmin,adminDashboard}

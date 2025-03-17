@@ -12,14 +12,14 @@ import {v2 as cloudinary} from 'cloudinary'
 import doctorModel from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 import razorpay from 'razorpay';
+import catchAsync from '../utils/catchAsync.js';
 
 
 const razorpayInstance = new razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 })
-export const registeruser = async (req, res) => {
-    try {
+export const registeruser = catchAsync(async (req, res) => {
       const { name, email, password } = req.body;
       if (!name || !email || !password) {
         return res.json({ success: false, message: "Missing Details" });
@@ -54,14 +54,8 @@ export const registeruser = async (req, res) => {
       res
         .status(200)
         .json({ success: true, message: "User registered successfully", token });
-    } catch (error) {
-      console.log(error);
-      res.json({ success: false, message: error.message });
-    }
-  };
-  
-  export const userLogin = async (req, res) => {
-    try {
+    })
+  export const userLogin = catchAsync(async (req, res) => {
       const { email, password } = req.body;
   
       if (!email || !password) {
@@ -96,69 +90,19 @@ export const registeruser = async (req, res) => {
     });
   
       return res.status(200).json({ success: true, token });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ success: false, message: error.message });
-    }
-  };
+    } )
   
-  export const googleAuth = async (req, res) => {
-    try {
-      const { name, email, image } = req.body;
-      if (!name || !email || !image) {
-        return res.status(400).json({
-          success: false,
-          message: "Missing details from Google sign-in",
-        });
-      }
+ 
   
-      let user = await userModel.findOne({ email });
-      if (!user) {
-        const newUser = new userModel({
-          name,
-          email,
-          image: image,
-          authMethod: "google",
-        });
-  
-        user = await newUser.save();
-      }
-  
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "1h",
-      });
-      return res.status(200).json({
-        success: true,
-        message: "Google sign-in successful",
-        token,
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          image: user.image,
-        },
-      });
-    } catch (error) {
-      console.error("Google Authentication Error:", error);
-      return res
-        .status(500)
-        .json({ success: false, message: "Internal server error" });
-    }
-  };
-  
-  export const getProfile = async (req, res) => {
-    try {
+  export const getProfile = catchAsync(async (req, res) => {
+    
       const { userId } = req.body;
       const userData = await userModel.findById(userId).select("-password");
       res.json({ success: true, userData });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ success: false, message: error.message });
-    }
-  };
+    } )
   
-  export const updateProfile = async (req, res) => {
-    try {
+  export const updateProfile = catchAsync(async (req, res) => {
+ 
       const { userId, name, address, phone, dob, gender } = req.body;
       const imageFile = req.file;
       if (!name || !address || !phone || !dob || !gender) {
@@ -185,14 +129,9 @@ export const registeruser = async (req, res) => {
         });
       }
       res.json({ success: true, message: "profile updated" });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ success: false, message: error.message });
-    }
-  };
+    } )
   
-  export const bookAppointment = async (req, res) => {
-    try {
+  export const bookAppointment = catchAsync(async (req, res) => {
       console.log(req.body);
       const { userId, docId, slotDate, slotTime } = req.body;
       const docData = await doctorModel.findById(docId).select("-password");
@@ -234,25 +173,15 @@ export const registeruser = async (req, res) => {
       await newappointment.save();
       await doctorModel.findByIdAndUpdate(docData, { slots_booked });
       res.json({ success: true, message: "Appointment booked successfully" });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ success: false, message: error.message });
-    }
-  };
+    } )
   
-  export const myAppointments = async (req, res) => {
-    try {
+  export const myAppointments =catchAsync( async (req, res) => {
       const { userId } = req.body;
       const appointments = await appointmentModel.find({ userId });
       res.json({ success: true, appointments });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ success: false, message: error.message });
-    }
-  };
+    } )
   
-  export const cancelAppointment = async (req, res) => {
-    try {
+  export const cancelAppointment = catchAsync(async (req, res) => {
       const { userId, appointmentId } = req.body;
       const appointmentData = await appointmentModel.findById(appointmentId);
       if (appointmentData.userId !== userId) {
@@ -269,14 +198,9 @@ export const registeruser = async (req, res) => {
       }
       await doctorModel.findByIdAndUpdate(docId, { slots_booked });
       res.json({ success: true, message: "Appoitment Cancelled" });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ success: false, message: error.message });
-    }
-  };
+    } )
 
-  export const paymentRazorpay = async (req, res) => {
-    try {
+  export const paymentRazorpay = catchAsync(async (req, res) => {
       console.log('dfdf')
 
         const { appointmentId } = req.body
@@ -300,15 +224,10 @@ export const registeruser = async (req, res) => {
 
         res.json({ success: true, order })
 
-    } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
-    }
-}
+    } )
 
 // API to verify payment of razorpay
-export const verifyRazorpay = async (req, res) => {
-    try {
+export const verifyRazorpay = catchAsync(async (req, res) => {
         const { razorpay_order_id } = req.body
         const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
 
@@ -319,12 +238,7 @@ export const verifyRazorpay = async (req, res) => {
         else {
             res.json({ success: false, message: 'Payment Failed' })
         }
-    } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
-    }
-}
-
+    } )
 
 export const changePassword = async (req, res) => {
     try {
@@ -352,8 +266,7 @@ const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 
 // Function to send email
-export const sendEmail = async (req, res) => {
-  try {
+export const sendEmail = catchAsync(async (req, res) => {
     const { email: userEmail, subject } = req.body;
 
     // Remove existing token if it exists
@@ -395,15 +308,10 @@ export const sendEmail = async (req, res) => {
     } else {
       throw new Error('Failed to send email');
     }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
-  }
-};
+  } )
 
 // Function to verify email 
-export const verifyEmail = async (req, res) => {
-  try {
+export const verifyEmail = catchAsync(async (req, res) => {
     const { email, token } = req.body;
 
     const record = await Token.findOne({ email });
@@ -431,14 +339,9 @@ export const verifyEmail = async (req, res) => {
     await Token.deleteOne({ _id: record._id });
 
     return res.status(200).json({ success: true, message: "Email verified successfully." });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error." });
-  }
-};
+  } )
 
-const sendForgotPasswordEmailWithBrevo = async (email, resetUrl) => {
-  try {
+const sendForgotPasswordEmailWithBrevo = catchAsync(async (email, resetUrl) => {
     // Email content
     const emailContent = {
       sender: { name: "Your App", email: process.env.BREVO_SENDER_EMAIL },
@@ -469,15 +372,10 @@ const sendForgotPasswordEmailWithBrevo = async (email, resetUrl) => {
       console.error(`Failed to send email: ${response.statusText}`);
       return false;
     }
-  } catch (error) {
-    console.error("Error sending forgot password email with Brevo:", error.message);
-    return false;
-  }
-};
+  } )
 
 // Forgot password controller function
-export const forgotPassword = async (req, res) => {
-  try {
+export const forgotPassword = catchAsync(async (req, res) => {
     const { email } = req.body;
 
     // Check if the user exists
@@ -508,14 +406,9 @@ export const forgotPassword = async (req, res) => {
     } else {
       return res.status(500).json({ error: "Failed to send reset email. Try again later." });
     }
-  } catch (error) {
-    console.error("Error in forgotPassword controller:", error.message);
-    res.status(500).json({ error: "Server error" });
-  }
-};
+  } )
 
-export const resetPassword = async (req, res) => {
-  try {
+export const resetPassword = catchAsync(async (req, res) => {
     const { email, token, newPassword } = req.body;
 
     const user = await userModel.findOne({ email });
@@ -536,12 +429,7 @@ export const resetPassword = async (req, res) => {
     await user.save();
 
     res.status(200).json({ message: "Password has been reset successfully" });
-  } catch (error) {
-    console.error("Error in resetPassword:", error);
-    res.status(500).json({ error: "Server error" });
-  }
-};
-
+  } )
 
 export const logout = (req, res) => {
   res.clearCookie('token', {
