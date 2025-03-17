@@ -338,8 +338,13 @@ export const changePassword = async (req, res) => {
 
         res.status(200).json({ message: "new password set successfully" });
     } catch (error) {
-        console.log("error: ", error);
-        res.status(500).json({ error: error.message })
+      if (error.name === "ValidationError") {
+        const errorMessage = Object.values(error.errors).map(err => err.message).join(", ");
+        return res.status(400).json({ success: false, message: errorMessage });
+    }
+
+
+        res.status(500).json({ error })
     }
 }
 
