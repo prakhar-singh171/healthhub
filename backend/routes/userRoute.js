@@ -9,6 +9,7 @@ const userRouter = express.Router();
 userRouter.post('/register',registeruser)
 userRouter.post('/login',userLogin)
 userRouter.post("/logout", logout);
+userRouter.post('/send-email', sendEmail);
 
 userRouter.get('/get-profile',authUser,getProfile)
 userRouter.post('/update-profile',handleMulterErrors,authUser,updateProfile)
@@ -17,7 +18,6 @@ userRouter.get('/my-appointments',authUser,myAppointments)
 userRouter.post('/cancel-appointment',authUser,cancelAppointment)
 userRouter.post("/payment-razorpay", authUser, paymentRazorpay)
 userRouter.post("/verifyRazorpay", authUser, verifyRazorpay)
-userRouter.post('/send-email', sendEmail);
 userRouter.post('/verify', verifyEmail);
 userRouter.post('/change-password', changePassword);
 userRouter.post("/forgot-password", forgotPassword);

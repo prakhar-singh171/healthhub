@@ -20,6 +20,7 @@ const MyProfile = () => {
     newPassword: "",
     confirmPassword: "",
   });
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const updateUserProfileData = async () => {
     try {
@@ -51,6 +52,32 @@ const MyProfile = () => {
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.message || "Network error");
+    }
+  };
+
+  const handleResendVerificationEmail = async () => {
+    try {
+      setIsVerifying(true);
+      const { data } = await axios.post(
+        `${backendUrl}/api/user/send-email`,
+        { email: userData.email, subject: "EmailVerification" },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (data.message) {
+        toast.success("Verification email sent successfully!");
+      } else {
+        toast.error(data.error || "Failed to send verification email.");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Network error");
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -130,6 +157,21 @@ const MyProfile = () => {
           <div className="grid grid-cols-[1fr_3fr] gap-y-2.5 mt-3 text-neutral-700">
             <p className="font-medium">Email id:</p>
             <p className="text-blue-500">{userData.email}</p>
+            <p className="font-medium">Verification:</p>
+            {userData.isVerified ? (
+              <p className="text-green-500 font-medium">Verified</p>
+            ) : (
+              <div className="flex items-center gap-2">
+                <p className="text-red-500 font-medium">Not Verified</p>
+                <button
+                  className="text-blue-500 underline"
+                  disabled={isVerifying}
+                  onClick={handleResendVerificationEmail}
+                >
+                  {isVerifying ? "Sending..." : "Resend Verification Email"}
+                </button>
+              </div>
+            )}
             <p className="font-medium">Phone:</p>
             {isEdit ? (
               <input

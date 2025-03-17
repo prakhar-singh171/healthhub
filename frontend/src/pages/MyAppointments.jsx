@@ -39,9 +39,7 @@ const MyAppointments = () => {
       const { data } = await axios.get(
         backendUrl + "/api/user/my-appointments",
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true,
         }
       );
       if (data.success && Array.isArray(data.appointments)) {
@@ -61,9 +59,7 @@ const MyAppointments = () => {
         backendUrl + "/api/user/cancel-appointment",
         { appointmentId },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true,
         }
       );
       if (data.success) {
@@ -93,7 +89,9 @@ const MyAppointments = () => {
             console.log(response)
 
             try {
-                const { data } = await axios.post(backendUrl + "/api/user/verifyRazorpay", response, { headers: {  Authorization: `Bearer ${token}`, } });
+                const { data } = await axios.post(backendUrl + "/api/user/verifyRazorpay", response,{
+                  withCredentials: true,
+                });
                 if (data.success) {
                     navigate('/my-appointments')
                     getUserAppointments()
@@ -111,7 +109,9 @@ const MyAppointments = () => {
 // Function to make payment using razorpay
 const appointmentRazorpay = async (appointmentId) => {
     try {
-        const { data } = await axios.post(backendUrl + '/api/user/payment-razorpay', { appointmentId }, { headers: {  Authorization: `Bearer ${token}`, } })
+        const { data } = await axios.post(backendUrl + '/api/user/payment-razorpay', { appointmentId }, {
+          withCredentials: true,
+        })
         if (data.success) {
             initPay(data.order)
         }else{

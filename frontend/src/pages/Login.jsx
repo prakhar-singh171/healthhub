@@ -32,7 +32,8 @@ const Login = () => {
         response = await axios.post(`${backendUrl}/api/user/login`, {
           email,
           password,
-        });
+        },
+      {withCredentials:true});
         if (response.data.success) {
           localStorage.setItem("token", response.data.token);
           setToken(response.data.token);
@@ -47,9 +48,6 @@ const Login = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    // Handle Google Sign-In
-  };
 
   return (
     <form

@@ -5,7 +5,7 @@ import { AppContext } from '../../context/AppContext'
 
 const DashBoard = () => {
   const {aToken,dashData,
-    getDashData,Appointmentcancel} = useContext(AdminContext)
+    getDashData,Appointmentcancel,appointments} = useContext(AdminContext)
     const {slotsDateFormat} = useContext(AppContext)
     useEffect(()=>{
       if(aToken){

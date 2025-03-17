@@ -31,13 +31,12 @@ export const registeruser = catchAsync(async (req, res) => {
       if (password.length < 4) {
         return res.json({ success: false, message: "Enter a strong pasword" });
       }
-      const salt = await bcrypt.genSalt(10);
-      const hasedpassword = await bcrypt.hash(password, salt);
+    
   
       const userData = {
         name,
         email,
-        password: hasedpassword,
+        password
       };
       const newuser = new userModel(userData);
       const user = await newuser.save();
@@ -70,6 +69,7 @@ export const registeruser = catchAsync(async (req, res) => {
           .status(404)
           .json({ success: false, message: "User not found" });
       }
+       console.log(password);
   
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
@@ -83,11 +83,11 @@ export const registeruser = catchAsync(async (req, res) => {
       });
 
       res.cookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'None'
-        
-    });
+        httpOnly: true, // Ensures the cookie is not accessible via JavaScript
+        secure: false, // Set to true in production (HTTPS required)
+        sameSite: 'Lax', // Adjust based on frontend-backend origins
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week (in milliseconds)
+      });
   
       return res.status(200).json({ success: true, token });
     } )
@@ -341,38 +341,38 @@ export const verifyEmail = catchAsync(async (req, res) => {
     return res.status(200).json({ success: true, message: "Email verified successfully." });
   } )
 
-const sendForgotPasswordEmailWithBrevo = catchAsync(async (email, resetUrl) => {
-    // Email content
-    const emailContent = {
-      sender: { name: "Your App", email: process.env.BREVO_SENDER_EMAIL },
-      to: [{ email }],
-      subject: "Password Reset Request",
-      htmlContent: `
-        <h1>Password Reset Request</h1>
-        <p>You have requested to reset your password.</p>
-        <p>Click the link below to reset your password:</p>
-        <a href="${resetUrl}" target="_blank">${resetUrl}</a>
-        <p>If you did not request this, you can safely ignore this email.</p>
-      `,
-    };
+// const sendForgotPasswordEmailWithBrevo = catchAsync(async (email, resetUrl) => {
+//     // Email content
+//     const emailContent = {
+//       sender: { name: "Your App", email: process.env.BREVO_SENDER_EMAIL },
+//       to: [{ email }],
+//       subject: "Password Reset Request",
+//       htmlContent: `
+//         <h1>Password Reset Request</h1>
+//         <p>You have requested to reset your password.</p>
+//         <p>Click the link below to reset your password:</p>
+//         <a href="${resetUrl}" target="_blank">${resetUrl}</a>
+//         <p>If you did not request this, you can safely ignore this email.</p>
+//       `,
+//     };
 
-    // Send email using Brevo's API
-    const response = await axios.post(BREVO_API_URL, emailContent, {
-      headers: {
-        "Content-Type": "application/json",
-        "api-key": process.env.BREVO_API_KEY,
-      },
-    });
+//     // Send email using Brevo's API
+//     const response = await axios.post(BREVO_API_URL, emailContent, {
+//       headers: {
+//         "Content-Type": "application/json",
+//         "api-key": process.env.BREVO_API_KEY,
+//       },
+//     });
 
-    // Check response status
-    if (response.status === 201) {
-      console.log(`Forgot password email sent to ${email}`);
-      return true;
-    } else {
-      console.error(`Failed to send email: ${response.statusText}`);
-      return false;
-    }
-  } )
+//     // Check response status
+//     if (response.status === 201) {
+//       console.log(`Forgot password email sent to ${email}`);
+//       return true;
+//     } else {
+//       console.error(`Failed to send email: ${response.statusText}`);
+//       return false;
+//     }
+//   } )
 
 // Forgot password controller function
 export const forgotPassword = catchAsync(async (req, res) => {
@@ -397,8 +397,29 @@ export const forgotPassword = catchAsync(async (req, res) => {
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&email=${email}`;
 
     // Send the reset password email
-    const emailSent = await sendForgotPasswordEmailWithBrevo(email, resetUrl);
-    if (emailSent) {
+    const emailContent = {
+      sender: { name: "Your App", email: process.env.BREVO_SENDER_EMAIL },
+      to: [{ email }],
+      subject: "Password Reset Request",
+      htmlContent: `
+        <h1>Password Reset Request</h1>
+        <p>You have requested to reset your password.</p>
+        <p>Click the link below to reset your password:</p>
+        <a href="${resetUrl}" target="_blank">${resetUrl}</a>
+        <p>If you did not request this, you can safely ignore this email.</p>
+      `,
+    };
+
+    // Send email using Brevo's API
+    const response = await axios.post(BREVO_API_URL, emailContent, {
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": process.env.BREVO_API_KEY,
+      },
+    });
+
+    // Check response status
+    if (response.status === 201) {
       return res.status(200).json({
         success:'true',
         message: "Password reset email sent successfully. Please check your email.",

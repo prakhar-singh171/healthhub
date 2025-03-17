@@ -19,7 +19,8 @@ connectCloudinary();
 dotenv.config()
 
 const corsOptions = {
-    origin: process.env.FRONTEND_URL, // Allow requests only from your frontend URL
+    origin: [process.env.FRONTEND_URL,process.env.ADMIN_URL],
+        // Allow requests only from your frontend URL
     credentials: true, // Allow cookies to be sent
 };
 

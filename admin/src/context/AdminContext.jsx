@@ -72,6 +72,7 @@ const Appointmentcancel = async(appointmentId)=>{
         if(data.success){
             toast.success(data.message)
             getAllappointments()
+            getDashData()
             
         }else{
             toast.error(data.message)
