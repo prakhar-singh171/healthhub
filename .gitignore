@@ -70,3 +70,6 @@ config.json
 
 # Ignore VS Code settings
 /.vscode/
+backend/uploads/image-1742242204121.png
+
+backend/uploads
