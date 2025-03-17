@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from 'bcrypt'
 
 const userSchema = new mongoose.Schema(
   {
@@ -14,6 +15,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+      minlength:8
     },
     image: {
       type: String,
@@ -56,6 +58,29 @@ const userSchema = new mongoose.Schema(
 
   { timestamps: true }
 );
+
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    // Skip if the password field hasn't been modified
+    return next();
+  }
+
+  // Validate password length
+  console.log(this.password)
+  if (this.password.length < 8) {
+    const error = new Error("Password must be at least 8 characters long");
+    return next(error);
+  }
+
+  // Hash the password before saving
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 const userModel = mongoose.model.user || mongoose.model("user", userSchema);
 export default userModel;

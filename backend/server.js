@@ -6,6 +6,7 @@ import connectCloudinary from './config/cloudinary.js';
 import adminRouter from './routes/adminRoute.js';
 import doctorRouter from './routes/doctorRoute.js';
 import userRouter from './routes/userRoute.js';
+import cookieParser from 'cookie-parser';
 
 import dotenv from 'dotenv'
 const app = express();
@@ -15,8 +16,17 @@ connectDB();
 connectCloudinary();
 dotenv.config()
 
+const corsOptions = {
+    origin: process.env.FRONTEND_URL, // Allow requests only from your frontend URL
+    credentials: true, // Allow cookies to be sent
+};
+
+app.use(cors(corsOptions));
+
+app.use(cookieParser());
+
 app.use(express.json())
-app.use(cors())
+app.use(cors(corsOptions))
 
 app.use('/api/admin',adminRouter)
 app.use('/api/doctor',doctorRouter)

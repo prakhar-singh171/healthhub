@@ -2,20 +2,37 @@ import React, { useContext, useState } from 'react'
 import { assets } from '../assets/assets'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
-
+import axios from 'axios'
 const Navbar = () => {
 
   const navigate = useNavigate()
+  const {backendUrl}=useContext(AppContext)
 
   const [showMenu, setShowMenu] = useState(false)
   const { token, setToken, userData } = useContext(AppContext)
   console.log(token); console.log(userData);
 
-  const logout = () => {
-    localStorage.removeItem('token')
-    setToken(false)
-    navigate('/login')
-  }
+  const logout = async () => {
+    try {
+      // Make an API call to logout the user
+      await axios.post(`${backendUrl}/api/user/logout`, {}, {
+       
+      });
+  
+      // Clear the token from localStorage
+      localStorage.removeItem('token');
+      setToken(false);
+  
+      // Navigate to the login page
+      navigate('/login');
+  
+      toast.success('Successfully logged out.');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      toast.error(error.response?.data?.message || 'Failed to log out. Please try again.');
+    }
+  };
+  
 
   return (
     <div className='flex items-center justify-between text-sm py-4 mb-5 border-b border-b-[#ADADAD]'>

@@ -1,14 +1,17 @@
 import express from 'express'
-import { registeruser,userLogin,getProfile,updateProfile,bookAppointment,myAppointments,cancelAppointment, paymentRazorpay, verifyRazorpay, verifyEmail, sendEmail, changePassword, forgotPassword, resetPassword } from '../controllers/userController.js';
+import { registeruser,userLogin,getProfile,updateProfile,bookAppointment,myAppointments,cancelAppointment, paymentRazorpay, verifyRazorpay, verifyEmail, sendEmail, changePassword, forgotPassword, resetPassword, logout } from '../controllers/userController.js';
 import authUser from '../middlewares/authUser.js';
 import upload from '../middlewares/multer.js';
+import { handleMulterErrors } from '../controllers/multerController.js';
 
 const userRouter = express.Router();
 
 userRouter.post('/register',registeruser)
 userRouter.post('/login',userLogin)
+userRouter.post("/logout", logout);
+
 userRouter.get('/get-profile',authUser,getProfile)
-userRouter.post('/update-profile',upload.single('image'),authUser,updateProfile)
+userRouter.post('/update-profile',handleMulterErrors,authUser,updateProfile)
 userRouter.post('/book-appointment',authUser,bookAppointment)
 userRouter.get('/my-appointments',authUser,myAppointments)
 userRouter.post('/cancel-appointment',authUser,cancelAppointment)

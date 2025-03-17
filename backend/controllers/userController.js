@@ -43,6 +43,14 @@ export const registeruser = async (req, res) => {
       const user = await newuser.save();
   
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'None'
+      
+    });
+
       res
         .status(200)
         .json({ success: true, message: "User registered successfully", token });
@@ -79,6 +87,13 @@ export const registeruser = async (req, res) => {
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
         expiresIn: "1h",
       });
+
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'None'
+        
+    });
   
       return res.status(200).json({ success: true, token });
     } catch (error) {
@@ -318,7 +333,7 @@ export const changePassword = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
-        user.password = await bcrypt.hash(req.body.newPassword, 10);
+        user.password = req.body.newPassword;
         await user.save();
 
         res.status(200).json({ message: "new password set successfully" });
@@ -510,7 +525,7 @@ export const resetPassword = async (req, res) => {
     }
 
     // Update the password
-    user.password = await bcrypt.hash(newPassword, 10);
+    user.password = newPassword;
     user.resetPasswordToken = undefined; // Clear token
     user.resetPasswordExpire = undefined; // Clear expiration
     await user.save();
@@ -521,3 +536,14 @@ export const resetPassword = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+
+export const logout = (req, res) => {
+  res.clearCookie('token', {
+      httpOnly: true, 
+      secure: true, 
+      sameSite: 'None'
+  });
+  res.status(200).json({ message: "Logged out successfully" });
+};
+
