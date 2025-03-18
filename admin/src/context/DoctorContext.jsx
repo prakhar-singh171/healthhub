@@ -35,6 +35,7 @@ const DoctorContextProvider = ({children})=>{
             if(data){
                toast.success(data.message)
                getAllappointments()
+               getDashData()
                 
             }else{
                 toast.error(data.message)

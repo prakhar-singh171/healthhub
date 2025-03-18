@@ -25,14 +25,10 @@ const DoctorProfile = () => {
         toast.success(data.message)
         setIsEdit(false)
         getprofiledata()
-      }else{
-   const msg=error.response?.data?.message || 'Something went wrong'
-             toast.error(msg)
-
       }
     } catch (error) {
-      toast.error(error.message)
-      console.log(error)
+      const msg=error.response?.data?.message || 'Something went wrong'
+      toast.error(msg)
     }
   }
   useEffect(() => {

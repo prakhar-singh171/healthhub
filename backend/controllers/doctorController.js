@@ -5,6 +5,7 @@ import appointmentModel from "../models/appointmentModel.js";
 
 import jwt from "jsonwebtoken";
 import catchAsync from "../utils/catchAsync.js";
+import mongoose from "mongoose";
 
 export const changeAvailability = catchAsync(async (req,res)=>{
         const {docId} = req.body;
@@ -21,14 +22,14 @@ export const loginDoctor = catchAsync(async (req,res)=>{
         const {email,password} = req.body;
         const doctor = await doctorModel.findOne({email})
         if(!doctor){
-            res.status(500).json({success:false,message:"Invalid crdentials"})
+            res.status(400).json({success:false,message:"Invalid crdentials"})
         }
         const isMatch = await bcrypt.compare(password,doctor.password)
         if(isMatch){
             const token = jwt.sign({id:doctor._id},process.env.JWT_SECRET)
             res.status(200).json({success:true,token})
         }else{
-            res.status(500).json({success:false,message:"Invalid crdentials"})
+            res.status(400).json({success:false,message:"Invalid crdentials"})
 
         }
     } )
@@ -39,16 +40,23 @@ export const appointmentDoctor = catchAsync(async (req,res)=>{
        res.status(200).json({success:true,appointments}) 
     } )
 
-export const appointmentComplete = catchAsync(async(req,res)=>{
-        const {docId,appointmentId} = req.body;
-        const appointmentData = await appointmentModel.findById(appointmentId)
-        if(appointmentData && appointmentData.docId === docId){
-            await appointmentModel.findByIdAndUpdate(appointmentId,{isCompleted:true})
-            return res.status(200).json({success:true,message:"Appointment completed"})
-        }else{
-            return res.status(500).json({success:false,message:"Mark failed"})
-        }
-    } )
+
+    export const appointmentComplete = catchAsync(async (req, res) => {
+      const { docId, appointmentId } = req.body;
+      console.log(docId);
+    
+      // Fetch appointment data
+      const appointmentData = await appointmentModel.findById(appointmentId);
+    
+      if (appointmentData && appointmentData.docId.equals(new mongoose.Types.ObjectId(docId))) {
+        // Update appointment to mark as completed
+        await appointmentModel.findByIdAndUpdate(appointmentId, { isCompleted: true });
+        return res.status(200).json({ success: true, message: "Appointment completed" });
+      } else {
+        return res.status(400).json({ success: false, message: "Mark failed" });
+      }
+    });
+    
 export const appointmentCancel = catchAsync(async(req,res)=>{
         const {docId,appointmentId} = req.body;
         const appointmentData = await appointmentModel.findById(appointmentId)
@@ -56,7 +64,7 @@ export const appointmentCancel = catchAsync(async(req,res)=>{
             await appointmentModel.findByIdAndUpdate(appointmentId,{cancelled:true})
             return res.status(200).json({success:true,message:"Appointment cancelled"})
         }else{
-            return res.status(500).json({success:false,message:"Cancellation failed"})
+            return res.status(400).json({success:false,message:"Cancellation failed"})
         }
     } )
 

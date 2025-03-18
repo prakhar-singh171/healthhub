@@ -12,14 +12,14 @@ const addDoctor = catchAsync(async(req,res)=>{
         const {name,email,password,speciality,education,experience,about,fees,address} = req.body;
         const imagefile = req.file;
         if(!name || !email || !password || !speciality || !education || !experience || !about || !fees || !address){
-          return  res.status(500).json({success:false,message:"Missing Details"})
+          return  res.status(400).json({success:false,message:"Missing Details"})
         }
 
         if(!validator.isEmail(email)){
-            return  res.status(500).json({success:false,message:"Please enter a valid email"})
+            return  res.status(400).json({success:false,message:"Please enter a valid email"})
         }
         if(password.length < 4){
-            return  res.status(500).json({success:false,message:"Please enter a strong password"})
+            return  res.status(400).json({success:false,message:"Please enter a strong password"})
         }
          const salt = await bcrypt.genSalt(10)
          const hashedPassword = await bcrypt.hash(password,salt);

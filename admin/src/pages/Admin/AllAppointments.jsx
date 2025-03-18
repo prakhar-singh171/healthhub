@@ -30,12 +30,12 @@ const AllAppointments = () => {
           <div key={index} className='flex flex-wrap justify-between max-sm:gap-2 sm:grid-cols-[0.5fr_3fr_1fr_3fr_3fr_1fr_1fr]  sm:grid items-center text-gray-500 py-3 px-6 border-b hover:bg-gray-200'>
             <p className='max-sm:hidden'>{index + 1}</p>
             <div className='flex gap-2 items-center'>
-              <img className='w-8 rounded-full' src={item.userData.image} alt="userimage" /> <p>{item.userData.name}</p>
+              <img className='w-8 rounded-full' src={item.userId.image} alt="userimage" /> <p>{item.userId.name}</p>
             </div>
-            <p className='max-sm:hidden'>{calculateAge(item.userData.dob)}</p>
+            <p className='max-sm:hidden'>{calculateAge(item.userId.dob)}</p>
             <p>{slotsDateFormat(item.slotDate)},{item.slotTime}</p>
             <div className='flex gap-2 items-center'>
-              <img className='w-8 rounded-full bg-gray-200' src={item.docData.image} alt="userimage" /> <p>{item.docData.name}</p>
+              <img className='w-8 rounded-full bg-gray-200' src={item.docId.image} alt="userimage" /> <p>{item.docId.name}</p>
             </div>
             <p>{currency}{item.amount}</p>
             {

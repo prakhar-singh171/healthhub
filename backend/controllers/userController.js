@@ -15,6 +15,7 @@ import appointmentModel from "../models/appointmentModel.js";
 import razorpay from 'razorpay';
 import catchAsync from '../utils/catchAsync.js';
 import AppError from '../utils/appError.js';
+import mongoose from 'mongoose';
 
 
 const razorpayInstance = new razorpay({
@@ -192,6 +193,7 @@ export const registeruser = catchAsync(async (req, res) => {
   
   export const myAppointments =catchAsync( async (req, res) => {
       const { userId } = req.body;
+      console.log('dfsdfdsfsdf')
       const appointments = await appointmentModel.find({ userId });
       res.status(200).json({ success: true, appointments });
     } )
@@ -199,7 +201,7 @@ export const registeruser = catchAsync(async (req, res) => {
   export const cancelAppointment = catchAsync(async (req, res) => {
       const { userId, appointmentId } = req.body;
       const appointmentData = await appointmentModel.findById(appointmentId);
-      if (appointmentData.userId !== userId) {
+      if (!appointmentData.userId.equals(new mongoose.Types.ObjectId(userId))) {
         return res.status(400).json({ success: false, message: "unauthorized action " });
       }
       await appointmentModel.findByIdAndUpdate(appointmentData, {
@@ -212,7 +214,7 @@ export const registeruser = catchAsync(async (req, res) => {
         slots_booked[slotDate] = slots_booked[slotDate].filter((e) => e !== slotTime);
       }
       await doctorModel.findByIdAndUpdate(docId, { slots_booked });
-      res.status(200).json({ success: true, message: "Appoitment Cancelled" });
+      res.status(200).json({ success: true, message: "Appointment Cancelled" });
     } )
 
   export const paymentRazorpay = catchAsync(async (req, res) => {
@@ -221,7 +223,6 @@ export const registeruser = catchAsync(async (req, res) => {
         const { appointmentId } = req.body
         const appointmentData = await appointmentModel.findById(appointmentId)
 
-        console.log(appointmentData);
         if (!appointmentData || appointmentData.cancelled) {
           console.log('aa')
             return res.status(400).json({ success: false, message: 'Appointment Cancelled or not found' })
@@ -234,8 +235,12 @@ export const registeruser = catchAsync(async (req, res) => {
             receipt: appointmentId,
         }
 
+        console.log('sdf')
+
         // creation of an order
         const order = await razorpayInstance.orders.create(options)
+
+        console.log('sdf1')
 
         res.status(200).json({ success: true, order })
 

@@ -3,22 +3,21 @@ import mongoose from 'mongoose';
 const tokenSchema = new mongoose.Schema({
     token: {
         type: String,
-        required: true, // Ensures a token is always present
+        required: true, 
     },
     email: {
         type: String,
-        required: true, // Ensures email is mandatory
-        match: [/.+\@.+\..+/, "Please enter a valid email"], // Validates email format
+        required: true, 
     },
     sub: {
         type: String,
-        required: true, // Ensures the purpose of the token is specified
-        default: "EmailVerification", // Default to email verification
+        required: true, 
+        default: "EmailVerification", 
     },
     createdAt: {
         type: Date,
-        default: Date.now, // Automatically sets the current date/time
-        expires: 45 * 60, // TTL (time-to-live) of 45 minutes (in seconds)
+        default: Date.now, 
+        expires: 45 * 60, 
     },
 });
 
