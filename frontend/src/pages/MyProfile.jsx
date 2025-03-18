@@ -36,9 +36,7 @@ const MyProfile = () => {
         backendUrl + "/api/user/update-profile",
         formdata,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials:true
         }
       );
       console.log(data);
@@ -64,9 +62,7 @@ const MyProfile = () => {
         `${backendUrl}/api/user/send-email`,
         { email: userData.email, subject: "EmailVerification" },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+         withCredentials:true
         }
       );
 
@@ -96,9 +92,7 @@ const MyProfile = () => {
           newPassword: passwordData.newPassword,
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials:true
         }
       );
 

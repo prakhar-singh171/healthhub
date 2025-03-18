@@ -119,7 +119,7 @@ export const registeruser = catchAsync(async (req, res) => {
         dob,
         gender,
         address: JSON.parse(address),
-      });
+      }, { new: true, runValidators: true });
       if (imageFile) {
         const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
           resource_type: "image",
@@ -143,15 +143,18 @@ export const registeruser = catchAsync(async (req, res) => {
       res.status(200).json({ success: true, message: "profile updated" });
     } )
   
-  export const bookAppointment = catchAsync(async (req, res) => {
+  export const bookAppointment = catchAsync(async (req, res,next) => {
       console.log(req.body);
       const { userId, docId, slotDate, slotTime } = req.body;
+      if(!slotDate || !slotTime){
+        return next(new AppError('Please give both slotdate and slottime',400));
+      }
       const docData = await doctorModel.findById(docId).select("-password");
       console.log(docData.available);
       if (!Boolean(docData.available)) {
         console.log('11');
         return res
-          .status(200)
+          .status(400)
           .json({ success: false, message: "Doctor not available" });
       }
       console.log('sdfsdf');
@@ -197,7 +200,7 @@ export const registeruser = catchAsync(async (req, res) => {
       const { userId, appointmentId } = req.body;
       const appointmentData = await appointmentModel.findById(appointmentId);
       if (appointmentData.userId !== userId) {
-        return res.status(500).json({ success: false, message: "unauthorized action " });
+        return res.status(400).json({ success: false, message: "unauthorized action " });
       }
       await appointmentModel.findByIdAndUpdate(appointmentData, {
         cancelled: true,
@@ -221,7 +224,7 @@ export const registeruser = catchAsync(async (req, res) => {
         console.log(appointmentData);
         if (!appointmentData || appointmentData.cancelled) {
           console.log('aa')
-            return res.json({ success: false, message: 'Appointment Cancelled or not found' })
+            return res.status(400).json({ success: false, message: 'Appointment Cancelled or not found' })
         }
 
         // creating options for razorpay payment
@@ -234,7 +237,7 @@ export const registeruser = catchAsync(async (req, res) => {
         // creation of an order
         const order = await razorpayInstance.orders.create(options)
 
-        res.json({ success: true, order })
+        res.status(200).json({ success: true, order })
 
     } )
 
@@ -245,15 +248,17 @@ export const verifyRazorpay = catchAsync(async (req, res) => {
 
         if (orderInfo.status === 'paid') {
             await appointmentModel.findByIdAndUpdate(orderInfo.receipt, { payment: true })
-            res.json({ success: true, message: "Payment Successful" })
+            res.status(200).json({ success: true, message: "Payment Successful" })
         }
         else {
-            res.json({ success: false, message: 'Payment Failed' })
+            res.status(400).json({ success: false, message: 'Payment Failed' })
         }
     } )
 
 export const changePassword =catchAsync( async (req, res) => {
         const { email } = req.body;
+
+        if(!email) return next(new AppError('please provide email',400));
         const user = await userModel.findOne({ email });
         if (!user) {
             return res.status(404).json({ error: "User not found" });
@@ -307,7 +312,7 @@ export const sendEmail = catchAsync(async (req, res) => {
     if (response.status === 201) {
       res.status(200).json({ message: "Email sent successfully" });
     } else {
-      throw new Error('Failed to send email');
+      return next(new AppError('Failed to send email.please try again',400))
     }
   } )
 
@@ -426,7 +431,7 @@ export const forgotPassword = catchAsync(async (req, res) => {
         message: "Password reset email sent successfully. Please check your email.",
       });
     } else {
-      return res.status(500).json({ error: "Failed to send reset email. Try again later." });
+      return res.status(400).json({ error: "Failed to send reset email. Try again later." });
     }
   } )
 

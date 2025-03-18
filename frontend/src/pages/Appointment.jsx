@@ -92,6 +92,7 @@ const Appointment = () => {
             return navigate('/login')
         }
 
+
         const date = docSlots[slotIndex][0].datetime
 
         let day = date.getDate()
