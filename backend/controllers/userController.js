@@ -104,46 +104,40 @@ export const registeruser = catchAsync(async (req, res) => {
       res.status(200).json({ success: true, userData });
     } )
   
-  export const updateProfile = catchAsync(async (req, res) => {
- 
-      const { userId, name, address, phone, dob, gender } = req.body;
-      const imageFile = req.file;
-      console.log('sadfsd',req.body);
-      if (!name || !address || !phone || !dob || !gender) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Missing details" });
-      }
-      await userModel.findByIdAndUpdate(userId, {
-        name,
-        phone,
-        dob,
-        gender,
-        address: JSON.parse(address),
-      }, { new: true, runValidators: true });
-      if (imageFile) {
-        const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
-          resource_type: "image",
-        });
-        const imageURL = imageUpload.secure_url;
-        await userModel.findByIdAndUpdate(userId, { image: imageURL });
-
-        fs.unlink(imageFile.path, (err) => {
-          if (err) {
-            console.error("Error deleting file:", err);
-          } else {
-            console.log("File deleted successfully");
-          }
-        });
-
-        return res.status(200).json({
-          success: true,
-          message: "image updated successfully!",
-        });
-      }
-      res.status(200).json({ success: true, message: "profile updated" });
-    } )
+    export const updateProfile = catchAsync(async(req , res) => {
+      const {name , phone , address , dob , gender} = req.body
+      const imageFile = req.file 
   
+      if(!name || !phone || !dob || !gender) {
+          return res.status(400).json({
+              success: false,
+              message: "missing details"
+          })
+      }
+  
+      await userModel.findByIdAndUpdate(req.user._id, { name, phone, address: JSON.parse(address), dob, gender })
+  
+      if(imageFile){
+          try{
+              const imageUpload = await cloudinary.uploader.upload(imageFile.path, {resource_type: "image"})
+              const imageUrl = imageUpload.secure_url
+              fs.unlinkSync(imageFile.path)
+              await userModel.findByIdAndUpdate(req.user._id , {image:imageUrl})
+          } catch (error) {
+              fs.unlinkSync(imageFile.path)
+              return res.status(400).json({
+                  success:false,
+                  message: "Unable to upload the profile pic"
+              })
+          }
+      }
+  
+      res.status(200).json({
+          success: true,
+          message: "Profile updated successfully"
+      })
+  
+  })
   export const bookAppointment = catchAsync(async (req, res,next) => {
       console.log(req.body);
       const { userId, docId, slotDate, slotTime } = req.body;

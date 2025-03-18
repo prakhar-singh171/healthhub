@@ -23,9 +23,18 @@ const addDoctor = catchAsync(async(req,res)=>{
         }
          const salt = await bcrypt.genSalt(10)
          const hashedPassword = await bcrypt.hash(password,salt);
-         const imageUpload = await cloudinary.uploader.upload(imagefile.path,{resource_type:"image"})
-
-         const imageUrl = imageUpload.secure_url;
+         let imageUrl
+         try{
+             const imageUpload = await cloudinary.uploader.upload(imageFile.path, {resource_type: "image"})
+             imageUrl = imageUpload.secure_url
+             fs.unlinkSync(imageFile.path)
+         } catch (error) {
+             fs.unlinkSync(imageFile.path)
+             return res.json({
+                 success:false,
+                 message:"Unable to upload the profile pic"
+             })
+         }
 
          const doctorData = {
             name,
@@ -44,13 +53,7 @@ const addDoctor = catchAsync(async(req,res)=>{
          await newDoctor.save();
 
          
-                 fs.unlink(imagefile.path, (err) => {
-                   if (err) {
-                     console.error("Error deleting file:", err);
-                   } else {
-                     console.log("File deleted successfully");
-                   }
-                 });
+                
          res.status(200).json({success:true,message:"Doctor Added"})
     } )
 const loginAdmin = catchAsync(async (req,res)=>{
