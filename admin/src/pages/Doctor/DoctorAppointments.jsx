@@ -11,6 +11,7 @@ const DoctorAppointments = () => {
             getAllappointments()
         }
     },[dToken])
+    console.log(appointments);
   return (
    
       <div className='w-full m-5 max-w-6xl'>

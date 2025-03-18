@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
+import catchAsync from '../utils/catchAsync.js';
 
-const authUser = async (req, res, next) => {
-    try {
+const authUser = catchAsync(async (req, res, next) => {
         console.log(req.cookies);
         // console.log(req.cookie.token);
         let token;
@@ -20,12 +20,6 @@ const authUser = async (req, res, next) => {
         req.body.userId = decoded.id;
         req.user = decoded; 
         next(); 
-    } catch (error) {
-        console.log('tt')
-
-        console.log(error.message);
-        return res.json({ success: false, message: error.message });
-    }
-};
+    } )
 
 export default authUser;

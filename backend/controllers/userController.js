@@ -5,6 +5,7 @@ import Token from '../models/tokenModel.js';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import axios from 'axios';
+import fs from 'fs';
 
 
 import jwt from 'jsonwebtoken'
@@ -13,6 +14,7 @@ import doctorModel from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 import razorpay from 'razorpay';
 import catchAsync from '../utils/catchAsync.js';
+import AppError from '../utils/appError.js';
 
 
 const razorpayInstance = new razorpay({
@@ -22,14 +24,14 @@ const razorpayInstance = new razorpay({
 export const registeruser = catchAsync(async (req, res) => {
       const { name, email, password } = req.body;
       if (!name || !email || !password) {
-        return res.json({ success: false, message: "Missing Details" });
+        return res.status(400).json({ success: false, message: "Missing Details" });
       }
       if (!validator.isEmail(email)) {
-        return res.json({ success: false, message: "Enter a valid email" });
+        return res.status(400).json({ success: false, message: "Enter a valid email" });
       }
   
       if (password.length < 4) {
-        return res.json({ success: false, message: "Enter a strong pasword" });
+        return res.status(400).json({ success: false, message: "Enter a strong pasword" });
       }
     
   
@@ -98,13 +100,14 @@ export const registeruser = catchAsync(async (req, res) => {
     
       const { userId } = req.body;
       const userData = await userModel.findById(userId).select("-password");
-      res.json({ success: true, userData });
+      res.status(200).json({ success: true, userData });
     } )
   
   export const updateProfile = catchAsync(async (req, res) => {
  
       const { userId, name, address, phone, dob, gender } = req.body;
       const imageFile = req.file;
+      console.log('sadfsd',req.body);
       if (!name || !address || !phone || !dob || !gender) {
         return res
           .status(400)
@@ -123,12 +126,21 @@ export const registeruser = catchAsync(async (req, res) => {
         });
         const imageURL = imageUpload.secure_url;
         await userModel.findByIdAndUpdate(userId, { image: imageURL });
-        return res.json({
+
+        fs.unlink(imageFile.path, (err) => {
+          if (err) {
+            console.error("Error deleting file:", err);
+          } else {
+            console.log("File deleted successfully");
+          }
+        });
+
+        return res.status(200).json({
           success: true,
           message: "image updated successfully!",
         });
       }
-      res.json({ success: true, message: "profile updated" });
+      res.status(200).json({ success: true, message: "profile updated" });
     } )
   
   export const bookAppointment = catchAsync(async (req, res) => {
@@ -147,7 +159,7 @@ export const registeruser = catchAsync(async (req, res) => {
       let slots_booked = docData.slots_booked;
       if (slots_booked[slotDate]) {
         if (slots_booked[slotDate].includes(slotTime)) {
-          return res.json({ success: false, message: "Slot already booked" });
+          return new AppError('slot already booked',400);
         } else {
           slots_booked[slotDate].push(slotTime);
         }
@@ -172,20 +184,20 @@ export const registeruser = catchAsync(async (req, res) => {
       const newappointment = new appointmentModel(appointmentData);
       await newappointment.save();
       await doctorModel.findByIdAndUpdate(docData, { slots_booked });
-      res.json({ success: true, message: "Appointment booked successfully" });
+      res.status(200).json({ success: true, message: "Appointment booked successfully" });
     } )
   
   export const myAppointments =catchAsync( async (req, res) => {
       const { userId } = req.body;
       const appointments = await appointmentModel.find({ userId });
-      res.json({ success: true, appointments });
+      res.status(200).json({ success: true, appointments });
     } )
   
   export const cancelAppointment = catchAsync(async (req, res) => {
       const { userId, appointmentId } = req.body;
       const appointmentData = await appointmentModel.findById(appointmentId);
       if (appointmentData.userId !== userId) {
-        return res.json({ success: false, message: "unauthorized action " });
+        return res.status(500).json({ success: false, message: "unauthorized action " });
       }
       await appointmentModel.findByIdAndUpdate(appointmentData, {
         cancelled: true,
@@ -197,7 +209,7 @@ export const registeruser = catchAsync(async (req, res) => {
         slots_booked[slotDate] = slots_booked[slotDate].filter((e) => e !== slotTime);
       }
       await doctorModel.findByIdAndUpdate(docId, { slots_booked });
-      res.json({ success: true, message: "Appoitment Cancelled" });
+      res.status(200).json({ success: true, message: "Appoitment Cancelled" });
     } )
 
   export const paymentRazorpay = catchAsync(async (req, res) => {
@@ -240,8 +252,7 @@ export const verifyRazorpay = catchAsync(async (req, res) => {
         }
     } )
 
-export const changePassword = async (req, res) => {
-    try {
+export const changePassword =catchAsync( async (req, res) => {
         const { email } = req.body;
         const user = await userModel.findOne({ email });
         if (!user) {
@@ -251,17 +262,7 @@ export const changePassword = async (req, res) => {
         await user.save();
 
         res.status(200).json({ message: "new password set successfully" });
-    } catch (error) {
-      if (error.name === "ValidationError") {
-        const errorMessage = Object.values(error.errors).map(err => err.message).join(", ");
-        return res.status(400).json({ success: false, message: errorMessage });
-    }
-
-
-        res.status(500).json({ error })
-    }
-}
-
+    } )
 const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 

@@ -48,8 +48,8 @@ const MyAppointments = () => {
         toast.error("No appointments found or take the appointments");
       }
     } catch (error) {
-      console.error(error);
-      toast.error(error.message);
+     const msg=error.response?.data?.message || 'Something went wrong'
+                                 toast.error(msg)  
     }
   };
 
@@ -62,7 +62,7 @@ const MyAppointments = () => {
           withCredentials: true,
         }
       );
-      if (data.success) {
+      if (data) {
         toast.success(data.message);
         getUserAppointments();
         getDoctorsData()
@@ -70,8 +70,8 @@ const MyAppointments = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      console.error(error);
-      toast.error(error.message);
+     const msg=error.response?.data?.message || 'Something went wrong'
+                                 toast.error(msg)  
     }
   };
 
@@ -92,13 +92,13 @@ const MyAppointments = () => {
                 const { data } = await axios.post(backendUrl + "/api/user/verifyRazorpay", response,{
                   withCredentials: true,
                 });
-                if (data.success) {
+                if (data) {
                     navigate('/my-appointments')
                     getUserAppointments()
                 }
             } catch (error) {
-                console.log(error)
-                toast.error(error.message)
+              const msg=error.response?.data?.message || 'Something went wrong'
+                                          toast.error(msg)  
             }
         }
     };
@@ -112,14 +112,14 @@ const appointmentRazorpay = async (appointmentId) => {
         const { data } = await axios.post(backendUrl + '/api/user/payment-razorpay', { appointmentId }, {
           withCredentials: true,
         })
-        if (data.success) {
+        if (data) {
             initPay(data.order)
         }else{
             toast.error(data.message)
         }
     } catch (error) {
-        console.log(error)
-        toast.error(error.message)
+       const msg=error.response?.data?.message || 'Something went wrong'
+                                   toast.error(msg)  
     }
 }
 

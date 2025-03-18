@@ -38,7 +38,8 @@ const AddDoctor = () => {
                 
             })
             const {data} = await axios.post(backendUrl + '/api/admin/add-doctor',formData,{headers:{aToken}})
-            if(data.success){
+            console.log(data.statusCode,data)
+            if(data){
                 toast.success(data.message)
                 setDocImg('')
                 setName('')
@@ -55,7 +56,8 @@ const AddDoctor = () => {
             }
 
         } catch (error) {
-            toast.error(error.message)
+          const msg=error.response?.data?.message || 'Something went wrong'
+            toast.error(msg)
         }
        
        

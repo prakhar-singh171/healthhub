@@ -19,15 +19,15 @@ const VerifyEmail = () => {
 
         console.log(response);
 
-        if (response.data.success) {
+        if (response.data) {
           toast.success("Email verified successfully!");
           navigate("/login"); // Redirect to login or another page
         } else {
           toast.error(response.data.message || "Verification failed");
         }
       } catch (error) {
-        console.error("Verification error:", error);
-        toast.error("Invalid or expired verification link.");
+        const msg=error.response?.data?.message || 'Something went wrong'
+                   toast.error(msg)  
       } finally {
         setLoading(false);
       }

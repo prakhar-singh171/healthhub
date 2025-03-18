@@ -15,7 +15,7 @@ const DoctorContextProvider = ({children})=>{
             const {data} = await axios.get(backendUrl + '/api/doctor/appointments',{headers: {
                 Authorization: `Bearer ${dToken}`,
               },})
-            if(data.success){
+            if(data){
                 setAppointments(data.appointments)
                 // console.log(data.appointments.reverse());
                 
@@ -23,8 +23,8 @@ const DoctorContextProvider = ({children})=>{
                 toast.error(data.message)
             }
         } catch (error) {
-            console.error(error)
-            toast.error(error.message)
+          const msg=error.response?.data?.message || 'Something went wrong'
+          toast.error(msg)      
         }
     }
     const AppointmentComplete = async(appointmentId)=>{
@@ -32,7 +32,7 @@ const DoctorContextProvider = ({children})=>{
             const {data} = await axios.post(backendUrl + '/api/doctor/complete-appointment',{appointmentId},{headers: {
                 Authorization: `Bearer ${dToken}`,
               },})
-            if(data.success){
+            if(data){
                toast.success(data.message)
                getAllappointments()
                 
@@ -40,8 +40,8 @@ const DoctorContextProvider = ({children})=>{
                 toast.error(data.message)
             }
         } catch (error) {
-            console.error(error)
-            toast.error(error.message)
+           const msg=error.response?.data?.message || 'Something went wrong'
+                       toast.error(msg)      
         }
     }
     const Appointmentcancel = async(appointmentId)=>{
@@ -49,7 +49,7 @@ const DoctorContextProvider = ({children})=>{
             const {data} = await axios.post(backendUrl + '/api/doctor/cancel-appointment',{appointmentId},{headers: {
                 Authorization: `Bearer ${dToken}`,
               }})
-            if(data.success){
+            if(data){
                toast.success(data.message)
                getAllappointments()
                 
@@ -57,8 +57,8 @@ const DoctorContextProvider = ({children})=>{
                 toast.error(data.message)
             }
         } catch (error) {
-            console.error(error)
-            toast.error(error.message)
+          const msg=error.response?.data?.message || 'Something went wrong'
+          toast.error(msg)      
         }
     }
 
@@ -67,7 +67,7 @@ const DoctorContextProvider = ({children})=>{
             const {data} = await axios.get(backendUrl + '/api/doctor/dashboard',{headers: {
                 Authorization: `Bearer ${dToken}`,
               }})
-              if(data.success){
+              if(data){
                 setDashData(data.dashdata)
                 // console.log(data.dashdata);
                 
@@ -75,8 +75,8 @@ const DoctorContextProvider = ({children})=>{
                 toast.error(data.message)
               }
         } catch (error) {
-            console.error(error)
-            toast.error(error.message)
+          const msg=error.response?.data?.message || 'Something went wrong'
+                      toast.error(msg)      
         }
     }
     const getprofiledata = async () => {
@@ -86,15 +86,15 @@ const DoctorContextProvider = ({children})=>{
               Authorization: `Bearer ${dToken}`,
             },
           })
-          if (data.success) {
+          if (data) {
             setProfileData(data.profileData)
             // console.log("profile data", data.profileData)
           } else {
             toast.error(data.message)
           }
         } catch (error) {
-          console.error(error)
-          toast.error(error.message)
+          const msg=error.response?.data?.message || 'Something went wrong'
+          toast.error(msg)      
         }
       }
     const value = {

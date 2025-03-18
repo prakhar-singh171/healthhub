@@ -32,8 +32,9 @@ const handleCastErrorDB = (err) => {
 };
 
 const handleDuplicateFieldsDB = (err) => {
-  const value = err.keyValue.name;
-  const message = `Duplicate field value: ${value}. Please use another value!`;
+  const field = Object.keys(err.keyValue)[0]; 
+  const value = err.keyValue[field]; 
+  const message = `Duplicate field value: '${value}' for '${field}'. Please use another value!`;
   return new AppError(message, 400);
 };
 
@@ -46,8 +47,8 @@ const handleValidationErrorDB = (err) => {
 const handleJWTError = () =>
   new AppError('Invalid token. Please log in again.', 401);
 
-const handleTokenExpiredError = () =>
-  new AppError('Token has expired. Please log in again.', 401);
+const handleTokenExpiredError = () =>{console.log('aa');
+ return new AppError('Token has expired. Please log in again.', 401); }
 
 const globalErrorHandler = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
@@ -56,8 +57,10 @@ const globalErrorHandler = (err, req, res, next) => {
   if (process.env.NODE_ENV.trim() === 'development') {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV.trim() === 'production') {
+    console.log('adsfdf',err);
     let error = { ...err, message: err.message };
-
+    console.log('dfsdf',error);
+    console.log('finished')
     if (error.name === 'CastError') {
       error = handleCastErrorDB(error);
     }

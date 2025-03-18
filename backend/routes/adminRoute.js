@@ -9,7 +9,7 @@ import { handleMulterErrors } from '../controllers/multerController.js';
 
 const adminRouter = express.Router();
 
-adminRouter.post('/add-doctor',handleMulterErrors,addDoctor)
+adminRouter.post('/add-doctor',upload.single('image'),addDoctor)
 adminRouter.post('/login',loginAdmin);
 adminRouter.get('/all-doctors',authAdmin,alldoctors);
 adminRouter.post('/change-availability',authAdmin,changeAvailability)

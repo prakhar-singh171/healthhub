@@ -12,7 +12,7 @@ userRouter.post("/logout", logout);
 userRouter.post('/send-email', sendEmail);
 
 userRouter.get('/get-profile',authUser,getProfile)
-userRouter.post('/update-profile',handleMulterErrors,authUser,updateProfile)
+userRouter.post('/update-profile',upload.single('image'),authUser,updateProfile)
 userRouter.post('/book-appointment',authUser,bookAppointment)
 userRouter.get('/my-appointments',authUser,myAppointments)
 userRouter.post('/cancel-appointment',authUser,cancelAppointment)

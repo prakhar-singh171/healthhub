@@ -15,18 +15,15 @@ const AppContextProvider = ({children}) => {
         try {
             const response = await axios.get(backendUrl + '/api/doctor/list');
             
-            if (response.data && response.data.success) {
+            if (response.data) {
                 if (Array.isArray(response.data.doctors)) {
                     setDoctors(response.data.doctors);
                     toast.success(response.message);
                 }
-            } else {
-                console.error("API request failed:", response.data);
-                toast.error(response.data?.message || "Failed to fetch doctors");
-            }
+            } 
         } catch (error) {
-            console.error("Error fetching doctors:", error);
-            toast.error(error.message || "An error occurred while fetching doctors");
+            const msg=error.response?.data?.message || 'Something went wrong'
+                       toast.error(msg)  
         }
     }
 
@@ -35,13 +32,15 @@ const AppContextProvider = ({children}) => {
             const {data} = await axios.get(`${backendUrl}/api/user/get-profile`,
                 {
                     withCredentials: true,
-                  });            if(data.success){
+                  });          
+                    if(data){
                 setUserData(data.userData)
             }else{
                 toast.error(data.error)
             }
         } catch (error) {
-            toast.error(error.message || "An Error Occurred while profile")
+             const msg=error.response?.data?.message || 'Something went wrong'
+                        toast.error(msg)  
         }
     }
     const value = {

@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
+import catchAsync from "../utils/catchAsync.js";
 
-const authDoctor = async (req, res, next) => {
-  try {
+const authDoctor = catchAsync(async (req, res, next) => {
     const authHeader = req.headers.authorization;
     console.log('aaa',authHeader)
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -16,10 +16,6 @@ const authDoctor = async (req, res, next) => {
     req.body.docId = decoded.id;
 
     next(); // Proceed to the next middleware or route handler
-  } catch (error) {
-    console.error("Authorization Error:", error.message);
-    return res.status(401).json({ success: false, message: "Invalid Token" });
-  }
-};
+  } )
 
 export default authDoctor;

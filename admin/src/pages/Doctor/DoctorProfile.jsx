@@ -21,12 +21,13 @@ const DoctorProfile = () => {
           Authorization: `Bearer ${dToken}`,
         },
       })
-      if(data.success){
+      if(data){
         toast.success(data.message)
         setIsEdit(false)
         getprofiledata()
       }else{
-      toast.error(data.message)
+   const msg=error.response?.data?.message || 'Something went wrong'
+             toast.error(msg)
 
       }
     } catch (error) {

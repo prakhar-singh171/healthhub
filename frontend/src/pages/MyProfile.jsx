@@ -41,13 +41,15 @@ const MyProfile = () => {
           },
         }
       );
-      if (data.success) {
+      console.log(data);
+      if (data) {
         toast.success(data.message);
         await loadUserProfileData();
         setImage(false);
         setIsEdit(false);
-      } else {
-        toast.error(data.error);
+      } else { 
+        const msg=error.response?.data?.message || 'Something went wrong'
+                  toast.error(msg)  
       }
     } catch (error) {
       console.error(error);
@@ -99,6 +101,8 @@ const MyProfile = () => {
           },
         }
       );
+
+      console.log(data);
       if (data.message) {
         toast.success(data.message);
         setShowPasswordModal(false);

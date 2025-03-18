@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from 'bcrypt'
+import AppError from "../utils/appError.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -15,7 +16,8 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      minlength: 8,
+   
+     
      
     },
     image: {
@@ -69,8 +71,9 @@ userSchema.pre("save", async function (next) {
   // Validate password length
   console.log(this.password)
   if (this.password.length < 8) {
-    const error = new Error("Password must be at least 8 characters long");
-    return next(error);
+    console.log('adf')
+    return next(new AppError('passwords must be at least 8 characters long',400));
+    
   }
 
   // Hash the password before saving

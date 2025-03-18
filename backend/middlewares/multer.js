@@ -1,6 +1,7 @@
 import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
+import AppError from "../utils/appError.js";
 
 // Resolve the __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -19,7 +20,8 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
     if (file.mimetype.startsWith("image/")) cb(null, true);
-    else cb(new Error("Only image files are allowed"), false);
+    else
+    cb(new AppError('Only image files are allowed', 400), false);
 };
 
 const upload = multer({ storage, fileFilter });

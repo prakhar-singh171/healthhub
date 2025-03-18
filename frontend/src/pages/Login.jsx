@@ -22,11 +22,12 @@ const Login = () => {
           email,
           password,
         });
-        if (response.data.success) {
+        if (response.data) {
           toast.success("Sign up successful! You can log in now.");
           setState("login");
         } else {
-          toast.error(response.data.message || "Sign up failed.");
+         const msg=error.response?.data?.message || 'Something went wrong'
+                                     toast.error(msg)  
         }
       } else {
         response = await axios.post(`${backendUrl}/api/user/login`, {
@@ -34,7 +35,7 @@ const Login = () => {
           password,
         },
       {withCredentials:true});
-        if (response.data.success) {
+        if (response.data) {
           localStorage.setItem("token", response.data.token);
           setToken(response.data.token);
           toast.success("Login successful!");

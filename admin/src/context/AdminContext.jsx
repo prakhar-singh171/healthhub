@@ -18,7 +18,7 @@ const AdminContextProvider = ({children}) => {
                     Authorization: `Bearer ${aToken}`,
                 },
             });
-            if (response.data && response.data.success) {
+            if (response.data) {
                 setDoctors(response.data.doctors);
             } else {
                 toast.error(response.data?.message || "Failed to fetch doctors");
@@ -26,8 +26,8 @@ const AdminContextProvider = ({children}) => {
 
             // console.log('Full response:', response.data.doctors);   
         } catch (error) {
-            toast.error(error.message)
-        }
+  const msg=error.response?.data?.message || 'Something went wrong'
+            toast.error(msg)        }
     }
 const changeAvailability = async (docId)=>{
     try {
@@ -36,15 +36,15 @@ const changeAvailability = async (docId)=>{
                 Authorization: `Bearer ${aToken}`,
             }}
         )
-        if(data.success){
+        if(data){
             toast.success(data.message)
             getAllDoctors()
         }else{
             toast.error(data.message)
         }
     } catch (error) {
-        toast.error(error.message)
-        
+  const msg=error.response?.data?.message || 'Something went wrong'
+            toast.error(msg)        
     }
 }
 const getAllappointments = async()=>{
@@ -52,7 +52,7 @@ const getAllappointments = async()=>{
     const {data} = await axios.get(backendUrl + '/api/admin/appointments',{headers: {
         Authorization: `Bearer ${aToken}`,
     }})
-    if(data.success){
+    if(data){
         setAppointments(data.appointments )
         // console.log(data.appointments );
         
@@ -60,7 +60,8 @@ const getAllappointments = async()=>{
         toast.error(data.message)
     }
    } catch (error) {
-    toast.error(error.message)
+      const msg=error.response?.data?.message || 'Something went wrong'
+                toast.error(msg)
     
    }
 }
@@ -69,7 +70,7 @@ const Appointmentcancel = async(appointmentId)=>{
         const {data} = await axios.post(backendUrl + '/api/admin/appointment-cancel',{appointmentId},{headers: {
             Authorization: `Bearer ${aToken}`,
         }})
-        if(data.success){
+        if(data){
             toast.success(data.message)
             getAllappointments()
             getDashData()
@@ -78,7 +79,8 @@ const Appointmentcancel = async(appointmentId)=>{
             toast.error(data.message)
         }
     } catch (error) {
-    toast.error(error.message)
+      const msg=error.response?.data?.message || 'Something went wrong'
+                toast.error(msg)
         
     }
 }
@@ -87,7 +89,7 @@ const getDashData = async(req,res)=>{
             const {data} = await axios.get(backendUrl + '/api/admin/dashboard',{headers: {
                 Authorization: `Bearer ${aToken}`,
             }})
-            if(data.success){
+            if(data){
                 setDashData(data.dashData)
                 console.log(data.dashData);  
             }else{
@@ -95,8 +97,8 @@ const getDashData = async(req,res)=>{
 
             }
         } catch (error) {
-    toast.error(error.message)
-            
+  const msg=error.response?.data?.message || 'Something went wrong'
+            toast.error(msg)            
         }
 }
     const value = {

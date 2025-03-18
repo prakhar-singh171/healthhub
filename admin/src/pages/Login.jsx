@@ -20,7 +20,7 @@ const Login = () => {
           email,
           password,
         });
-        if (data.success) {
+        if (data) {
           localStorage.setItem("aToken", data.token);
           setAToken(data.token);
         } else {
@@ -31,7 +31,7 @@ const Login = () => {
           email,
           password,
         });
-        if (data.success) {
+        if (data) {
           localStorage.setItem("dToken", data.token);
           setDToken(data.token);
           console.log(data.token);
@@ -41,7 +41,8 @@ const Login = () => {
         }
       }
     } catch (error) {
-      console.log(error);
+      const msg=error.response?.data?.message || 'Something went wrong'
+                 toast.error(msg)  
     }
   };
   return (

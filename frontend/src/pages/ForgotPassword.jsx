@@ -21,7 +21,7 @@ const ForgotPassword = () => {
     try {
       const response = await axios.post(`${backendUrl}/api/user/forgot-password`, { email });
         console.log(response);
-      if (response.data.success) {
+      if (response.data) {
         toast.success(response.data.message || "Password reset email sent.");
         navigate("/login"); // Redirect to login page after successful request
       } else {
