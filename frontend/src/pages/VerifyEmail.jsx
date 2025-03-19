@@ -12,7 +12,7 @@ const VerifyEmail = () => {
     const verifyEmail = async () => {
       try {
         // Call the backend API for verification
-        const response = await axios.post("http://localhost:4000/api/user/verify", {
+        const response = await axios.post(`${backendUrl}/api/user/verify`, {
           token,
           email,
         });
