@@ -35,17 +35,21 @@ app.use('/api/admin',adminRouter)
 app.use('/api/doctor',doctorRouter)
 app.use('/api/user',userRouter)
 
-app.all('*', (req, res, next) => {
-
-    next(new AppError(`Can't find ${req.originalUrl} on this server`), 404);
-  });
-  
   //ERROR HEADLING MIDDLEWARE
-  app.use(errorController);
 
 app.get('/',(req,res)=>{
     res.send('API IS WORKING')
 })
+
+
+app.all('*', (req, res, next) => {
+
+    next(new AppError(`Can't find ${req.originalUrl} on this server`), 404);
+  });
+
+  app.use(errorController);
+
+  
 
 app.listen(port,()=>{
     console.log("server is listing on",port);
