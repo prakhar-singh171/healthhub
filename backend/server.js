@@ -20,6 +20,8 @@ dotenv.config()
 
 const corsOptions = {
     origin: [process.env.FRONTEND_URL,process.env.ADMIN_URL],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+
         // Allow requests only from your frontend URL
     credentials: true, // Allow cookies to be sent
 };
