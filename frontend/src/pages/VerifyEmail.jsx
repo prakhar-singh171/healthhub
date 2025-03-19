@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { AppContext } from "../context/AppContext";
 
 const VerifyEmail = () => {
   const { token, email } = useParams(); // Extract token and email from the URL
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-
+  const {backendUrl}=useContext(AppContext)
   useEffect(() => {
     const verifyEmail = async () => {
       try {

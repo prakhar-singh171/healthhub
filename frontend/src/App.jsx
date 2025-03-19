@@ -15,7 +15,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ResetPassword from './pages/ResetPassword'
 import ForgotPassword from './pages/ForgotPassword'
-function Ll() {
+function App() {
 
   return (
     <div className="mx-4 sm:mx-[0.1%]">
@@ -41,4 +41,4 @@ function Ll() {
   )
 }
 
-export default Ll
+export default App
