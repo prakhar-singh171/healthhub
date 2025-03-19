@@ -5,12 +5,13 @@ import doctorModel from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 import userModel from "../models/userModel.js";
 import jwt from 'jsonwebtoken'
+import fs from 'fs'
 import catchAsync from "../utils/catchAsync.js";
 
 
 const addDoctor = catchAsync(async(req,res)=>{
         const {name,email,password,speciality,education,experience,about,fees,address} = req.body;
-        const imagefile = req.file;
+        const imageFile = req.file;
         if(!name || !email || !password || !speciality || !education || !experience || !about || !fees || !address){
           return  res.status(400).json({success:false,message:"Missing Details"})
         }
@@ -30,7 +31,7 @@ const addDoctor = catchAsync(async(req,res)=>{
              fs.unlinkSync(imageFile.path)
          } catch (error) {
              fs.unlinkSync(imageFile.path)
-             return res.json({
+             return res.status(400).json({
                  success:false,
                  message:"Unable to upload the profile pic"
              })
@@ -95,7 +96,6 @@ const appointmentsAdmin = catchAsync(async (req, res) => {
 
     } )
 
-// API for appointment cancellation
 const appointmentCancel = catchAsync(async (req, res) => {
 
         const { appointmentId } = req.body

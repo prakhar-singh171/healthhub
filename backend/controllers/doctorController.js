@@ -45,7 +45,6 @@ export const appointmentDoctor = catchAsync(async (req,res)=>{
       const { docId, appointmentId } = req.body;
       console.log(docId);
     
-      // Fetch appointment data
       const appointmentData = await appointmentModel.findById(appointmentId);
     
       if (appointmentData && appointmentData.docId.equals(new mongoose.Types.ObjectId(docId))) {
