@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import catchAsync from '../utils/catchAsync.js';
 const authAdmin = catchAsync(async (req, res, next) => {
-        const authHeader = req.headers.authorization; 
+        const authHeader = req.headers.authorization || req.headers.Authorization; 
         if (!authHeader) {
             return res.json({ success: false, message: "Not Authorized, Login Again" });
         }
