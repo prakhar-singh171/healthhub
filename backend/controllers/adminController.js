@@ -9,54 +9,65 @@ import fs from 'fs'
 import catchAsync from "../utils/catchAsync.js";
 
 
-const addDoctor = catchAsync(async(req,res)=>{
-        const {name,email,password,speciality,education,experience,about,fees,address} = req.body;
-        const imageFile = req.file;
-        if(!name || !email || !password || !speciality || !education || !experience || !about || !fees || !address){
-          return  res.status(400).json({success:false,message:"Missing Details"})
-        }
+const addDoctor = catchAsync(async (req, res) => {
+    const { name, email, password, speciality, education, experience, about, fees, address } = req.body;
+    const imageFile = req.file; // File in memory (uploaded via multer)
 
-        if(!validator.isEmail(email)){
-            return  res.status(400).json({success:false,message:"Please enter a valid email"})
-        }
-        if(password.length < 4){
-            return  res.status(400).json({success:false,message:"Please enter a strong password"})
-        }
-         const salt = await bcrypt.genSalt(10)
-         const hashedPassword = await bcrypt.hash(password,salt);
-         let imageUrl
-         try{
-             const imageUpload = await cloudinary.uploader.upload(imageFile.path, {resource_type: "image"})
-             imageUrl = imageUpload.secure_url
-             fs.unlinkSync(imageFile.path)
-         } catch (error) {
-             fs.unlinkSync(imageFile.path)
-             return res.status(400).json({
-                 success:false,
-                 message:"Unable to upload the profile pic"
-             })
-         }
+    if (!name || !email || !password || !speciality || !education || !experience || !about || !fees || !address) {
+        return res.status(400).json({ success: false, message: "Missing Details" });
+    }
 
-         const doctorData = {
-            name,
-            email,
-            password:hashedPassword,
-            speciality,
-            education,
-            experience,
-            about,
-            fees,
-            image:imageUrl,
-            address:JSON.parse(address),
-            date:Date.now()
-         }
-         const newDoctor = new doctorModel(doctorData)
-         await newDoctor.save();
+    if (!validator.isEmail(email)) {
+        return res.status(400).json({ success: false, message: "Please enter a valid email" });
+    }
 
-         
-                
-         res.status(200).json({success:true,message:"Doctor Added"})
-    } )
+    if (password.length < 4) {
+        return res.status(400).json({ success: false, message: "Please enter a strong password" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    let imageUrl;
+    try {
+        const imageUpload = await new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream(
+                { resource_type: "image" },
+                (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result);
+                }
+            ).end(imageFile.buffer); 
+        });
+
+        imageUrl = imageUpload.secure_url;
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: "Unable to upload the profile picture",
+        });
+    }
+
+    const doctorData = {
+        name,
+        email,
+        password: hashedPassword,
+        speciality,
+        education,
+        experience,
+        about,
+        fees,
+        image: imageUrl,
+        address: JSON.parse(address),
+        date: Date.now(),
+    };
+
+    const newDoctor = new doctorModel(doctorData);
+    await newDoctor.save();
+
+    res.status(200).json({ success: true, message: "Doctor Added" });
+});
+
 const loginAdmin = catchAsync(async (req,res)=>{
         const {email,password} = req.body;
         if(email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD){
