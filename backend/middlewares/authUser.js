@@ -2,8 +2,8 @@ import jwt from 'jsonwebtoken';
 import catchAsync from '../utils/catchAsync.js';
 
 const authUser = catchAsync(async (req, res, next) => {
-        console.log(req.cookies);
-        // console.log(req.cookie.token);
+        // console.log('--------',req.);
+         console.log(req.cookies.token);
         let token;
         if (
           req.headers.authorization &&

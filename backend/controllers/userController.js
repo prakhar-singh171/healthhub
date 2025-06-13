@@ -44,8 +44,13 @@ export const registeruser = catchAsync(async (req, res) => {
       const newuser = new userModel(userData);
       const user = await newuser.save();
   
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-      res.cookie('token', token, {
+ const token = jwt.sign(
+    { id: user._id, role: 'user' },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' }
+);
+
+res.cookie('token', token, {
         httpOnly: true, 
         secure: true, 
         sameSite: 'None', 
@@ -80,13 +85,16 @@ export const registeruser = catchAsync(async (req, res) => {
           .json({ success: false, message: "Invalid credentials" });
       }
   
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "1h",
-      });
+   const token = jwt.sign(
+    { id: user._id, role: 'user' },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' }
+);
+
 
       res.cookie('token', token, {
         httpOnly: true, 
-        secure: true, 
+        secure: process.env.NODE_ENV==='production', 
         sameSite: 'None', 
         maxAge: 7 * 24 * 60 * 60 * 1000, 
       });
@@ -103,7 +111,9 @@ export const registeruser = catchAsync(async (req, res) => {
       res.status(200).json({ success: true, userData });
     } )
   
+     
     export const updateProfile = catchAsync(async(req , res) => {
+      console.log('tttttttt',req.body)
       const {name , phone , address , dob , gender} = req.body
       const imageFile = req.file 
   
@@ -113,9 +123,12 @@ export const registeruser = catchAsync(async (req, res) => {
               message: "missing details"
           })
       }
+
+      console.log("Updating user id:", req.body.userId);
+
   
-      await userModel.findByIdAndUpdate(req.user._id, { name, phone, address: JSON.parse(address), dob, gender })
-  
+      await userModel.findByIdAndUpdate(req.body.userId, { name, phone, address: JSON.parse(address), dob, gender })
+      console.log('ttttttttt',imageFile);
       if(imageFile){
           try{
               const imageUpload = await cloudinary.uploader.upload(imageFile.path, {resource_type: "image"})
@@ -137,6 +150,8 @@ export const registeruser = catchAsync(async (req, res) => {
       })
   
   })
+
+
   export const bookAppointment = catchAsync(async (req, res,next) => {
       console.log(req.body);
       const { userId, docId, slotDate, slotTime } = req.body;
@@ -404,11 +419,18 @@ export const resetPassword = catchAsync(async (req, res) => {
   } )
 
 export const logout = (req, res) => {
-  res.clearCookie('token', {
-      httpOnly: true, 
-      secure: true, 
-      sameSite: 'None'
+    console.log(req, 'logged out successfully');
+
+  res.cookie('token', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'None',
+    expires: new Date(0)
   });
-  res.status(200).json({ message: "Logged out successfully" });
+
+  console.log(req.cookies, 'logged out successfully');
+  res.status(200).json({ status: 'success' });
 };
+
+
 

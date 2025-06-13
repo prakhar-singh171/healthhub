@@ -9,29 +9,29 @@ const Navbar = () => {
   const {backendUrl}=useContext(AppContext)
 
   const [showMenu, setShowMenu] = useState(false)
-  const { token, setToken, userData } = useContext(AppContext)
+  const { token, setToken, userData,logout } = useContext(AppContext)
   console.log(token); console.log(userData);
 
-  const logout = async () => {
-    try {
-      // Make an API call to logout the user
-      await axios.post(`${backendUrl}/api/user/logout`, {}, {
+  // const logout = async () => {
+  //   try {
+  //     // Make an API call to logout the user
+  //     await axios.post(`${backendUrl}/api/user/logout`, {}, {
        
-      });
+  //     });
   
-      // Clear the token from localStorage
-      localStorage.removeItem('token');
-      setToken(false);
+  //     // Clear the token from localStorage
+  //     localStorage.removeItem('token');
+  //     setToken(false);
   
-      // Navigate to the login page
-      navigate('/login');
+  //     // Navigate to the login page
+  //     navigate('/login');
   
-      toast.success('Successfully logged out.');
-    } catch (error) {
-      console.error('Error during logout:', error);
-      toast.error(error.response?.data?.message || 'Failed to log out. Please try again.');
-    }
-  };
+  //     toast.success('Successfully logged out.');
+  //   } catch (error) {
+  //     console.error('Error during logout:', error);
+  //     toast.error(error.response?.data?.message || 'Failed to log out. Please try again.');
+  //   }
+  // };
   
 
   return (

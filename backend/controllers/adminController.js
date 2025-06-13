@@ -27,26 +27,21 @@ const addDoctor = catchAsync(async (req, res) => {
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-
     let imageUrl;
-    try {
-        const imageUpload = await new Promise((resolve, reject) => {
-            cloudinary.uploader.upload_stream(
-                { resource_type: "image" },
-                (error, result) => {
-                    if (error) reject(error);
-                    else resolve(result);
-                }
-            ).end(imageFile.buffer); 
-        });
-
-        imageUrl = imageUpload.secure_url;
-    } catch (error) {
-        return res.status(400).json({
-            success: false,
-            message: "Unable to upload the profile picture",
-        });
-    }
+        if(imageFile){
+          try{
+              const imageUpload = await cloudinary.uploader.upload(imageFile.path, {resource_type: "image"})
+              imageUrl = imageUpload.secure_url
+              fs.unlinkSync(imageFile.path)
+              await userModel.findByIdAndUpdate(req.user._id , {image:imageUrl})
+          } catch (error) {
+              fs.unlinkSync(imageFile.path)
+              return res.status(400).json({
+                  success:false,
+                  message: "Unable to upload the profile pic"
+              })
+          }
+      }
 
     const doctorData = {
         name,
@@ -71,8 +66,17 @@ const addDoctor = catchAsync(async (req, res) => {
 const loginAdmin = catchAsync(async (req,res)=>{
         const {email,password} = req.body;
         if(email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD){
-            const token =  jwt.sign({email: email}, process.env.JWT_SECRET, { expiresIn: '1h' })
-            res.status(200).json({success:true,token})
+const token = jwt.sign(   { email, role: 'admin' }, process.env.JWT_SECRET,{ expiresIn: '1h' });        
+
+res.cookie('token', token, {
+        httpOnly: true, 
+        secure: true, 
+        sameSite: 'None', 
+        maxAge: 7 * 24 * 60 * 60 * 1000, 
+      });
+
+      
+  res.status(200).json({success:true,token})
         }else{
             res.status(400).json({success:false,message:"Invalid Credentials"})
         }

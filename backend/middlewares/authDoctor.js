@@ -2,20 +2,23 @@ import jwt from "jsonwebtoken";
 import catchAsync from "../utils/catchAsync.js";
 
 const authDoctor = catchAsync(async (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    console.log('aaa',authHeader)
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
-        success: false,
-        message: "Not Authorized, Login Again",
-      });
-    }
-
-    const token = authHeader.split(" ")[1]; // Extract the token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.body.docId = decoded.id;
-
-    next(); // Proceed to the next middleware or route handler
+    console.log('--------',req.cookies.token);
+           // console.log(req.cookie.token);
+           let token;
+           if (
+             req.headers.authorization &&
+             req.headers.authorization.startsWith('Bearer')
+           ) {
+             token = req.headers.authorization.split(' ')[1];
+           } else if (req.cookies.token) {
+             token = req.cookies.token;
+           }
+   
+           console.log(token); 
+           const decoded = jwt.verify(token, process.env.JWT_SECRET); 
+           console.log(decoded)
+           req.body.docId = decoded.id;
+           next(); 
   } )
 
 export default authDoctor;

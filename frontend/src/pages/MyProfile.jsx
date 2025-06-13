@@ -39,7 +39,7 @@ const MyProfile = () => {
           withCredentials:true
         }
       );
-      console.log(data);
+      console.log('ttttttttt',data);
       if (data) {
         toast.success(data.message);
         await loadUserProfileData();

@@ -26,7 +26,20 @@ export const loginDoctor = catchAsync(async (req,res)=>{
         }
         const isMatch = await bcrypt.compare(password,doctor.password)
         if(isMatch){
-            const token = jwt.sign({id:doctor._id},process.env.JWT_SECRET)
+const token = jwt.sign(
+    { id: doctor._id, email: doctor.email, role: doctor.role },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' }
+);
+
+res.cookie('token', token, {
+        httpOnly: true, 
+        secure: true, 
+        sameSite: 'None', 
+        maxAge: 7 * 24 * 60 * 60 * 1000, 
+      });
+
+      
             res.status(200).json({success:true,token})
         }else{
             res.status(400).json({success:false,message:"Invalid crdentials"})
@@ -93,8 +106,11 @@ export const dashboardDoctor = catchAsync(async(req,res)=>{
     } )
 
 export const getdoctorprofile = catchAsync(async (req, res) => {
+
+    console.log('aaaaa');
       const { docId } = req.body
       const profiledata = await doctorModel.findById(docId).select('-password')
+      console.log(docId);
       res.status(200).json({ success: true, profileData: profiledata })
     } )
 export const updateProfileData = catchAsync(async (req,res)=>{

@@ -7,7 +7,7 @@ const userRouter = express.Router();
 
 userRouter.post('/register',registeruser)
 userRouter.post('/login',userLogin)
-userRouter.post("/logout", logout);
+userRouter.post("/logout",authUser, logout);
 userRouter.post('/send-email', sendEmail);
 
 userRouter.get('/get-profile',authUser,getProfile)
