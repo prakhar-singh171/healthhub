@@ -112,44 +112,52 @@ res.cookie('token', token, {
     } )
   
      
-    export const updateProfile = catchAsync(async(req , res) => {
-      console.log('tttttttt',req.body)
-      const {name , phone , address , dob , gender} = req.body
-      const imageFile = req.file 
-  
-      if(!name || !phone || !dob || !gender) {
-          return res.status(400).json({
-              success: false,
-              message: "missing details"
-          })
-      }
+   export const updateProfile = catchAsync(async (req, res) => {
+    console.log('Incoming request body:', req.body);
+    const { name, phone, address, dob, gender } = req.body;
+    const imageFile = req.file;
 
-      console.log("Updating user id:", req.body.userId);
+    if (!name || !phone || !dob || !gender) {
+        return res.status(400).json({
+            success: false,
+            message: "Missing details",
+        });
+    }
 
-  
-      await userModel.findByIdAndUpdate(req.body.userId, { name, phone, address: JSON.parse(address), dob, gender })
-      console.log('ttttttttt',imageFile);
-      if(imageFile){
-          try{
-              const imageUpload = await cloudinary.uploader.upload(imageFile.path, {resource_type: "image"})
-              const imageUrl = imageUpload.secure_url
-              fs.unlinkSync(imageFile.path)
-              await userModel.findByIdAndUpdate(req.user._id , {image:imageUrl})
-          } catch (error) {
-              fs.unlinkSync(imageFile.path)
-              return res.status(400).json({
-                  success:false,
-                  message: "Unable to upload the profile pic"
-              })
-          }
-      }
-  
-      res.status(200).json({
-          success: true,
-          message: "Profile updated successfully"
-      })
-  
-  })
+    console.log("Updating user id:", req.body.userId);
+
+    const updatedUser = await userModel.findByIdAndUpdate(
+        req.body.userId,
+        { name, phone, address: JSON.parse(address), dob, gender },
+        { new: true } 
+    );
+
+    if (imageFile) {
+        try {
+            const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+                resource_type: "image",
+            });
+            const imageUrl = imageUpload.secure_url;
+            fs.unlinkSync(imageFile.path);
+
+            updatedUser.image = imageUrl;
+            await updatedUser.save(); 
+        } catch (error) {
+            fs.unlinkSync(imageFile.path);
+            return res.status(400).json({
+                success: false,
+                message: "Unable to upload the profile pic",
+            });
+        }
+    }
+
+    res.status(200).json({
+        success: true,
+        message: "Profile updated successfully",
+        user: updatedUser, 
+    });
+});
+
 
 
   export const bookAppointment = catchAsync(async (req, res,next) => {
