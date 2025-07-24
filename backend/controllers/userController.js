@@ -201,7 +201,7 @@ res.cookie('token', token, {
       };
       const newappointment = new appointmentModel(appointmentData);
       await newappointment.save();
-      await doctorModel.findByIdAndUpdate(docData, { slots_booked });
+      await doctorModel.findByIdAndUpdate(docId, { slots_booked });
       res.status(200).json({ success: true, message: "Appointment booked successfully" });
     } )
   
